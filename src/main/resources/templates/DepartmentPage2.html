@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal — Departments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0f0e0d;
+            --cream: #f5f0e8;
+            --gold: #c9a84c;
+            --gold-light: #f0e6c4;
+            --rust: #c4522a;
+            --sage: #4a6741;
+            --border: #e2dbd0;
+            --muted: #8a847d;
+            --white: #ffffff;
+            --danger: #c4522a;
+            --success: #4a6741;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--cream);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: var(--ink);
+            padding: 0.9rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .topbar-brand {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .topbar-back {
+            color: rgba(245,240,232,0.6);
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+
+        .topbar-back:hover { color: var(--gold); }
+
+        /* ── Page header ── */
+        .page-header {
+            padding: 2rem 2.5rem 1.5rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header-left h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .count-badge {
+            background: var(--gold);
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .page-header-left p {
+            margin-top: 0.3rem;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .btn-add {
+            background: var(--ink);
+            color: var(--cream);
+            border: none;
+            padding: 0.7rem 1.4rem;
+            border-radius: 3px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add:hover {
+            background: var(--gold);
+            color: var(--ink);
+            transform: translateY(-1px);
+        }
+
+        /* ── Filter bar ── */
+        .filter-bar {
+            padding: 0 2.5rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+            padding: 0.65rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 3px;
+            background: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            color: var(--ink);
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .filter-input:focus {
+            border-color: var(--gold);
+        }
+
+        .filter-input::placeholder { color: #bbb5ae; }
+
+        .btn-filter {
+            padding: 0.65rem 1.2rem;
+            border: 1.5px solid var(--ink);
+            border-radius: 3px;
+            background: transparent;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--ink);
+        }
+
+        .btn-filter:hover {
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .btn-clear {
+            padding: 0.65rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 3px;
+            background: transparent;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--muted);
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-clear:hover {
+            border-color: var(--rust);
+            color: var(--rust);
+        }
+
+        /* Active filter tags */
+        .filter-tags {
+            padding: 0 2.5rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            background: var(--gold-light);
+            color: var(--ink);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* ── Table ── */
+        .table-container {
+            padding: 0 2.5rem 4rem;
+        }
+
+        .table-wrap {
+            background: var(--white);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(15,14,13,0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--ink);
+        }
+
+        thead th {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(245,240,232,0.7);
+        }
+
+        thead th:last-child { text-align: center; }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+
+        tbody tr:hover { background: #faf7f2; }
+
+        tbody td {
+            padding: 1rem 1.2rem;
+            font-size: 0.88rem;
+            color: var(--ink);
+            vertical-align: middle;
+        }
+
+        .dept-name {
+            font-weight: 500;
+            color: var(--ink);
+            transition: color 0.2s;
+        }
+
+        tbody tr:hover .dept-name {
+            color: var(--gold);
+        }
+
+        .dept-name a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .city-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .city-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .manager-info {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .manager-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--gold-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--ink);
+            flex-shrink: 0;
+        }
+
+        .manager-name {
+            font-size: 0.85rem;
+        }
+
+        .no-manager {
+            color: #c5bfb8;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .actions-cell {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 0.35rem 0.75rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1.5px solid;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-edit {
+            border-color: var(--ink);
+            color: var(--ink);
+            background: transparent;
+            margin-right: 0.4rem;
+        }
+
+        .btn-edit:hover {
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .btn-delete {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: transparent;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p { font-size: 0.85rem; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,14,13,0.6);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--white);
+            border-radius: 6px;
+            width: 480px;
+            max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(15,14,13,0.3);
+            animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.92) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            padding: 1.5rem 1.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover { color: var(--ink); }
+
+        .modal-body {
+            padding: 1.5rem 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 3px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem;
+            color: var(--ink);
+            background: var(--white);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus { border-color: var(--gold); }
+
+        .form-hint {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.8rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .btn-cancel {
+            padding: 0.65rem 1.2rem;
+            border: 1.5px solid var(--border);
+            border-radius: 3px;
+            background: transparent;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--muted);
+        }
+
+        .btn-save {
+            padding: 0.65rem 1.5rem;
+            background: var(--ink);
+            color: var(--cream);
+            border: none;
+            border-radius: 3px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-save:hover { background: var(--gold); color: var(--ink); }
+
+        /* Alert toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--ink);
+            color: var(--cream);
+            padding: 0.9rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            z-index: 200;
+            display: none;
+            animation: slideIn 0.3s ease;
+            border-left: 3px solid var(--gold);
+        }
+
+        .toast.show { display: block; }
+        .toast.error { border-left-color: var(--rust); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Confirm dialog */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,14,13,0.5);
+            z-index: 150;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-overlay.active { display: flex; }
+
+        .confirm-box {
+            background: var(--white);
+            border-radius: 6px;
+            padding: 2rem;
+            width: 380px;
+            max-width: 95vw;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(15,14,13,0.3);
+        }
+
+        .confirm-box h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .confirm-box p {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .page-header, .filter-bar, .table-container { padding-left: 1rem; padding-right: 1rem; }
+            .filter-tags { padding-left: 1rem; padding-right: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<nav class="topbar">
+    <a class="topbar-brand" th:href="@{/}">HR Portal</a>
+    <a class="topbar-back" th:href="@{/}">← Back to Team</a>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+    <div class="page-header-left">
+        <h2>
+            Departments
+            <span class="count-badge" th:text="${totalCount}">0</span>
+        </h2>
+        <p>Browse, search and manage all departments</p>
+    </div>
+    <button class="btn-add" onclick="openAddModal()">
+        <span>+</span> Add Department
+    </button>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+    <input type="text"
+           id="nameFilter"
+           class="filter-input"
+           placeholder="Search by department name..."
+           th:value="${search}"
+           onkeydown="if(event.key==='Enter') applyFilters()">
+
+    <input type="text"
+           id="cityFilter"
+           class="filter-input"
+           placeholder="Filter by city..."
+           th:value="${city}"
+           onkeydown="if(event.key==='Enter') applyFilters()">
+
+    <button class="btn-filter" onclick="applyFilters()">Search</button>
+    <a class="btn-clear" th:href="@{/departments}">Clear</a>
+</div>
+
+<!-- Active filter tags -->
+<div class="filter-tags" th:if="${search != null or city != null}">
+    <span class="filter-tag" th:if="${search != null and search != ''}">
+        Name: <strong th:text="${search}"></strong>
+    </span>
+    <span class="filter-tag" th:if="${city != null and city != ''}">
+        City: <strong th:text="${city}"></strong>
+    </span>
+</div>
+
+<!-- Table -->
+<div class="table-container">
+    <div class="table-wrap">
+
+        <!-- Has data -->
+        <table th:if="${departments != null and !departments.isEmpty()}">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Department Name</th>
+                <th>City</th>
+                <th>Street Address</th>
+                <th>Manager</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="dept, stat : ${departments}"
+                th:onclick="|window.location.href='[[@{/departments/{id}/employees(id=${dept.departmentId})}]]'|"
+                style="cursor:pointer;">
+                <td style="color: var(--muted); font-size:0.78rem;"
+                    th:text="${stat.index + 1}">1</td>
+
+                <td class="dept-name" th:text="${dept.departmentName}">Name</td>
+
+                <td>
+                        <span class="city-badge" th:if="${dept.location != null}">
+                            <span class="city-dot"></span>
+                            <span th:text="${dept.location.city}">City</span>
+                        </span>
+                    <span class="no-manager" th:if="${dept.location == null}">—</span>
+                </td>
+
+                <td style="color: var(--muted); font-size:0.82rem;"
+                    th:text="${dept.location != null ? dept.location.streetAddress : '—'}">
+                </td>
+
+                <td>
+                    <div class="manager-info" th:if="${dept.manager != null}">
+                        <div class="manager-avatar"
+                             th:text="${dept.manager.firstName?.substring(0,1)}">M</div>
+                        <span class="manager-name"
+                              th:text="${dept.manager.firstName + ' ' + dept.manager.lastName}">Name</span>
+                    </div>
+                    <span class="no-manager" th:if="${dept.manager == null}">No Manager</span>
+                </td>
+
+                <td class="actions-cell" onclick="event.stopPropagation()">
+                    <button class="btn-edit"
+                            th:attr="onclick=|openEditModal(${dept.departmentId}, '${dept.departmentName}')|">
+                        Edit
+                    </button>
+                    <button class="btn-delete"
+                            th:attr="onclick=|confirmDelete(${dept.departmentId}, '${dept.departmentName}')|">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div class="empty-state" th:if="${departments == null or departments.isEmpty()}">
+            <h3>No departments found</h3>
+            <p>Try adjusting your search filters or add a new department.</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── ADD MODAL ── -->
+<div class="modal-overlay" id="addModalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Add New Department</span>
+            <button class="modal-close" onclick="closeModal('addModalOverlay')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Department Name *</label>
+                <input type="text" id="addName" class="form-control"
+                       placeholder="e.g. Marketing" maxlength="30">
+                <div class="form-hint">Maximum 30 characters</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Location ID *</label>
+                <input type="number" id="addLocationId" class="form-control"
+                       placeholder="e.g. 1700">
+                <div class="form-hint">Enter the location ID (e.g. 1700 for Seattle)</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Manager Employee ID (optional)</label>
+                <input type="number" id="addManagerId" class="form-control"
+                       placeholder="e.g. 100">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('addModalOverlay')">Cancel</button>
+            <button class="btn-save" onclick="saveDepartment()">Save Department</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── EDIT MODAL ── -->
+<div class="modal-overlay" id="editModalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Edit Department</span>
+            <button class="modal-close" onclick="closeModal('editModalOverlay')">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editDeptId">
+            <div class="form-group">
+                <label class="form-label">Department Name *</label>
+                <input type="text" id="editName" class="form-control" maxlength="30">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Location ID (optional)</label>
+                <input type="number" id="editLocationId" class="form-control"
+                       placeholder="Leave blank to keep current">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Manager Employee ID (optional)</label>
+                <input type="number" id="editManagerId" class="form-control"
+                       placeholder="Leave blank to keep current">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('editModalOverlay')">Cancel</button>
+            <button class="btn-save" onclick="updateDepartment()">Update Department</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── CONFIRM DELETE ── -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <h3>Delete Department?</h3>
+        <p id="confirmMsg">This action cannot be undone.</p>
+        <div class="confirm-actions">
+            <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+            <button class="btn-save" style="background:var(--danger);"
+                    onclick="executedDelete()">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    let deletingId = null;
+
+    // ── Filter ──
+    function applyFilters() {
+        const name = document.getElementById('nameFilter').value.trim();
+        const city = document.getElementById('cityFilter').value.trim();
+        const params = new URLSearchParams();
+        if (name) params.set('search', name);
+        if (city) params.set('city', city);
+        window.location.href = '/departments?' + params.toString();
+    }
+
+    // ── Modal helpers ──
+    function openAddModal() {
+        document.getElementById('addName').value = '';
+        document.getElementById('addLocationId').value = '';
+        document.getElementById('addManagerId').value = '';
+        document.getElementById('addModalOverlay').classList.add('active');
+    }
+
+    function openEditModal(id, name) {
+        document.getElementById('editDeptId').value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editLocationId').value = '';
+        document.getElementById('editManagerId').value = '';
+        document.getElementById('editModalOverlay').classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function confirmDelete(id, name) {
+        deletingId = id;
+        document.getElementById('confirmMsg').textContent =
+            `Delete "${name}"? This action cannot be undone.`;
+        document.getElementById('confirmOverlay').classList.add('active');
+    }
+
+    function closeConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('active');
+        deletingId = null;
+    }
+
+    // ── Toast ──
+    function showToast(message, isError = false) {
+        const t = document.getElementById('toast');
+        t.textContent = message;
+        t.className = 'toast show' + (isError ? ' error' : '');
+        setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    // ── Build body helper ──
+    function buildBody(name, locationId, managerId) {
+        const body = { departmentName: name };
+        if (locationId) body.location = `http://localhost:8080/locations/${locationId}`;
+        if (managerId)  body.manager  = `http://localhost:8080/employees/${managerId}`;
+        return body;
+    }
+
+    // ── POST ──
+    async function saveDepartment() {
+        const name       = document.getElementById('addName').value.trim();
+        const locationId = document.getElementById('addLocationId').value.trim();
+        const managerId  = document.getElementById('addManagerId').value.trim();
+
+        if (!name) { showToast('Department name is required', true); return; }
+        if (!locationId) { showToast('Location ID is required', true); return; }
+
+        try {
+            const res = await fetch('/department', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(buildBody(name, locationId, managerId))
+            });
+            if (res.status === 201) {
+                closeModal('addModalOverlay');
+                showToast('Department created successfully');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                const data = await res.json();
+                showToast(data.message || data.error || 'Failed to create', true);
+            }
+        } catch (e) { showToast('Network error', true); }
+    }
+
+    // ── PATCH ──
+    async function updateDepartment() {
+        const id         = document.getElementById('editDeptId').value;
+        const name       = document.getElementById('editName').value.trim();
+        const locationId = document.getElementById('editLocationId').value.trim();
+        const managerId  = document.getElementById('editManagerId').value.trim();
+
+        if (!name) { showToast('Department name is required', true); return; }
+
+        const body = { departmentName: name };
+        if (locationId) body.location = `http://localhost:8080/locations/${locationId}`;
+        if (managerId)  body.manager  = `http://localhost:8080/employees/${managerId}`;
+
+        try {
+            const res = await fetch(`/department/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.status === 204) {
+                closeModal('editModalOverlay');
+                showToast('Department updated successfully');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                const data = await res.json();
+                showToast(data.message || data.error || 'Failed to update', true);
+            }
+        } catch (e) { showToast('Network error', true); }
+    }
+
+    // ── DELETE ──
+    async function executedDelete() {
+        if (!deletingId) return;
+        try {
+            const res = await fetch(`/department/${deletingId}`, { method: 'DELETE' });
+            if (res.status === 204) {
+                closeConfirm();
+                showToast('Department deleted');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('Failed to delete', true);
+            }
+        } catch (e) { showToast('Network error', true); }
+    }
+
+    // Close modals on overlay click
+    document.getElementById('addModalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal('addModalOverlay');
+    });
+    document.getElementById('editModalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal('editModalOverlay');
+    });
+</script>
+</body>
+</html>
