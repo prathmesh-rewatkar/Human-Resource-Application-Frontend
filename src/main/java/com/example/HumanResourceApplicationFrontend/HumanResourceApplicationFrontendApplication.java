@@ -8,6 +8,6 @@ public class HumanResourceApplicationFrontendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(HumanResourceApplicationFrontendApplication.class, args);
+        System.out.println("frontend application working");
 	}
-
 }
