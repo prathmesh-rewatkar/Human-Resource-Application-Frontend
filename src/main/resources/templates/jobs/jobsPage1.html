@@ -70,7 +70,7 @@
         <thead>
             <tr style="background:#2a1a14;">
                 <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">#</th>
-                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Job ID</th>
+<!--                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Job ID</th>-->
                 <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Title</th>
                 <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Min Salary</th>
                 <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Max Salary</th>
@@ -82,7 +82,7 @@
                 <!-- Fixed: use pageOffset + s.count so page 2 shows 6,7,8... -->
                 <td style="padding:1rem 1rem;font-size:0.88rem;color:#8a6050;"
                     th:text="${pageOffset + s.count}"></td>
-                <td style="padding:1rem 1rem;font-size:0.88rem;color:#2a1a14;" th:text="${job.jobId}"></td>
+<!--                <td style="padding:1rem 1rem;font-size:0.88rem;color:#2a1a14;" th:text="${job.jobId}"></td>-->
                 <td style="padding:1rem 1rem;">
                     <a th:href="@{/jobs-page/{id}/employees(id=${job.jobId})}"
                        th:text="${job.jobTitle}"

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout('Location Detail', ~{::body-content})}">
+<body>
+<th:block th:fragment="body-content">
+
+    <!-- ── BACK BUTTON ── -->
+    <a th:href="@{/locations}" class="btn-ghost btn-sm"
+       style="display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;">
+        ← Back to Locations
+    </a>
+
+    <!-- ── LOCATION HERO ── -->
+    <div class="detail-hero">
+        <div class="detail-pin">📍</div>
+        <div style="flex:1">
+            <h1 class="detail-city" th:text="${location.city}">City</h1>
+            <div class="detail-meta">
+                <span th:if="${location.streetAddress}" th:text="${location.streetAddress}"></span>
+                <span th:if="${location.stateProvince}"  th:text="${location.stateProvince}"></span>
+                <span th:if="${location.postalCode}"
+                      class="cell-mono"
+                      th:text="${location.postalCode}"></span>
+            </div>
+            <div class="detail-tags">
+                <!--            <span class="tag tag-blue">-->
+                <!--                🌐 <span th:text="${location.country?.countryName ?: '(country unknown)'}"></span>-->
+                <!--            </span>-->
+                <!--            <span class="tag tag-green">-->
+                <!--                🗺 <span th:text="${location.country?.region?.regionName ?: '(region unknown)'}"></span>-->
+                <!--            </span>-->
+                <span class="tag tag-amber">
+                🏢 <span th:text="${allDeptCount}"></span>
+                departments<span th:if="${allDeptCount != 1}"></span> total
+                <span th:if="${departments.size() < allDeptCount}"
+                      th:text="' · ' + ${departments.size()} + ' with employees'"></span>
+            </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DEPARTMENTS + EMPLOYEES ── -->
+    <div class="card">
+
+        <div class="table-toolbar">
+            <div class="toolbar-left">
+                <span style="font-size:18px">👥</span>
+                <div>
+                    <strong style="font-size:15px">Departments &amp; Employees</strong>
+                    <p class="page-sub" style="margin:0">Click a department to expand its employees</p>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text"
+                           id="global-emp-search"
+                           class="search-input"
+                           placeholder="Search all employees…"
+                           style="width:240px"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-toolbar" style="border-top:none;padding:8px 16px;">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text"
+                       id="dept-filter"
+                       class="search-input"
+                       placeholder="Filter departments by name…"
+                       style="width:240px"/>
+            </div>
+            <span class="summary-num" id="dept-count"
+                  th:text="${departments.size()} + ' departments with employees'"></span>
+        </div>
+
+        <div th:if="${departments.empty}"
+             style="text-align:center;padding:48px 0;color:var(--ink3);font-size:14px;">
+            No departments linked to this location.
+        </div>
+
+        <div id="dept-list" th:unless="${departments.empty}">
+
+            <div th:each="dept, iterStat : ${departments}"
+                 class="dept-section"
+                 th:data-dept-name="${dept.departmentName.toLowerCase()}">
+
+                <button class="dept-toggle" aria-expanded="false">
+                    <div class="dept-title-group">
+                        <span class="dept-icon">🏢</span>
+                        <div>
+                            <span class="dept-name" th:text="${dept.departmentName}">Dept</span>
+                            <span class="dept-mgr"
+                                  th:if="${dept.manager != null}"
+                                  th:text="'Manager: ' + ${dept.manager.firstName} + ' ' + ${dept.manager.lastName}">
+                        </span>
+                            <span class="dept-mgr" th:unless="${dept.manager != null}">
+                            No manager assigned
+                        </span>
+                        </div>
+                    </div>
+                    <div class="dept-right">
+                    <span class="count-badge"
+                          th:text="${employeesByDept[dept.departmentName]?.size() ?: 0} + ' employees'">
+                    </span>
+                        <span class="toggle-icon">▸</span>
+                    </div>
+                </button>
+
+                <div class="dept-body">
+
+                    <div class="dept-search-row">
+                        <div class="search-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input type="text"
+                                   class="emp-search search-input"
+                                   placeholder="Search employees (name, email, job)…"
+                                   style="width:280px"/>
+                        </div>
+                        <span class="emp-count" style="font-size:12.5px;color:var(--ink3)"></span>
+                    </div>
+
+                    <div th:if="${employeesByDept[dept.departmentName] != null and !employeesByDept[dept.departmentName].empty}"
+                         class="emp-table-wrap">
+                        <table class="emp-table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Job Title</th>
+                                <th>Phone</th>
+                                <th>Salary</th>
+                            </tr>
+                            </thead>
+                            <tbody class="emp-tbody">
+                            <tr th:each="emp : ${employeesByDept[dept.departmentName]}"
+                                class="emp-row">
+                                <td class="emp-name"
+                                    th:text="${emp.firstName} + ' ' + ${emp.lastName}"></td>
+                                <td class="cell-small" th:text="${emp.email ?: '—'}"></td>
+                                <td>
+                                    <span class="tag tag-blue"
+                                          th:text="${emp.jobTitle ?: '—'}"></span>
+                                </td>
+                                <td class="cell-small" th:text="${emp.phoneNumber ?: '—'}"></td>
+                                <td class="salary-cell"
+                                    th:text="${emp.salary != null ? '$' + #numbers.formatDecimal(emp.salary, 0, 'COMMA', 0, 'POINT') : '—'}">
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div th:if="${employeesByDept[dept.departmentName] == null or employeesByDept[dept.departmentName].empty}"
+                         class="emp-empty">
+                        No employees in this department.
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ── Department name filter ──────────────────────────
+            var deptFilter   = document.getElementById('dept-filter');
+            var deptSections = document.querySelectorAll('.dept-section');
+            var deptCountEl  = document.getElementById('dept-count');
+
+            deptFilter.addEventListener('input', function() {
+                var q = this.value.toLowerCase();
+                var visible = 0;
+                deptSections.forEach(function(section) {
+                    var name = section.dataset.deptName || '';
+                    var show = name.includes(q);
+                    section.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+                deptCountEl.textContent = visible + ' departments';
+            });
+
+            // ── Global employee search ──────────────────────────
+            var globalSearch = document.getElementById('global-emp-search');
+
+            globalSearch.addEventListener('input', function() {
+                var q = this.value.toLowerCase();
+                if (!q) {
+                    document.querySelectorAll('.emp-row').forEach(function(r) { r.style.display = ''; });
+                    return;
+                }
+                document.querySelectorAll('.emp-row').forEach(function(row) {
+                    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+                });
+                // auto-open sections that have matching employees
+                document.querySelectorAll('.dept-section').forEach(function(section) {
+                    var hasVisible = Array.from(section.querySelectorAll('.emp-row'))
+                                          .some(function(r) { return r.style.display !== 'none'; });
+                    var body   = section.querySelector('.dept-body');
+                    var toggle = section.querySelector('.dept-toggle');
+                    var icon   = toggle.querySelector('.toggle-icon');
+                    if (hasVisible && !body.classList.contains('open')) {
+                        body.classList.add('open');
+                        toggle.setAttribute('aria-expanded', 'true');
+                        if (icon) icon.textContent = '▾';
+                    }
+                });
+            });
+
+        });
+    </script>
+
+</th:block>
+</body>
+</html>
