@@ -48,12 +48,4 @@ public class DepartmentDTO {
         private String stateProvince;
         private String postalCode;
     }
-//
-//    @Data
-//    public static class ManagerDTO {
-//        private String firstName;
-//        private String lastName;
-//        private String email;
-//    }
-
 }

@@ -272,7 +272,7 @@
 <!-- NAV -->
 <nav>
     <a class="nav-brand" href="#">HR Portal</a>
-    <a class="nav-back" href="#">Back to Team</a>
+    <a class="nav-back" href="/">Back to Team</a>
 </nav>
 
 <!-- PAGE -->
@@ -319,7 +319,6 @@
                 <th>Phone No.</th>
                 <th>Department</th>
                 <th>Salary</th>
-                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -331,12 +330,6 @@
                 <td th:text="${m.PhoneNumber}"></td>
                 <td class="dept-cell" th:text="${m.departmentName}"></td>
                 <td th:text="${m.salary}"></td>
-                <td class="actions-cell" onclick="event.stopPropagation()">
-                    <a th:href="@{/managers/edit/{id}(id=${m.employeeId})}" class="action-btn">Edit</a>
-                    <a th:href="@{/managers/delete/{id}(id=${m.employeeId})}"
-                       class="action-btn"
-                       onclick="return confirm('Delete this manager?')">Delete</a>
-                </td>
             </tr>
             </tbody>
         </table>

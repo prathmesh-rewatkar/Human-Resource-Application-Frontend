@@ -2,6 +2,7 @@ package com.example.HumanResourceApplicationFrontend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+
 import java.time.LocalDate;
 
 @Data

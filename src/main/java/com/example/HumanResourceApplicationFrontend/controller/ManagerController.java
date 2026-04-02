@@ -55,11 +55,13 @@ public class ManagerController {
 
         List<EmployeeRecordDTO> subordinates = managerService.getSubordinates(id);
 
+        EmployeeDTO manager = managerService.getEmployeeById(id);
+
         //List<EmployeeDTO> hierarchy = managerService.getHierarchy(id);
 
         model.addAttribute("subordinates", subordinates);
-        //model.addAttribute("hierarchy",hierarchy);
 
+        model.addAttribute("manager",manager);
 
         return "Manager/manager-detail";
     }
@@ -80,6 +82,6 @@ public class ManagerController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
-        return "redirect:/Manager/managers";
+        return "redirect:/managers";
     }
 }

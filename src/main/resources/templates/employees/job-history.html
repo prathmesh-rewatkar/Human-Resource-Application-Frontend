@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job History — HR Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{--ink:#0f0e0d;--cream:#f5f0e8;--gold:#c9a84c;--gold-light:#e8d5a0;--rust:#c4522a;--card-bg:#ffffff;--shadow:0 8px 40px rgba(15,14,13,0.12);--border:#e0d9cf;--muted:#9b9490}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+        body::before{content:'';position:fixed;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.12) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+        .top-nav{background:var(--ink);padding:0 4rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+        .nav-logo{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--cream);text-decoration:none}
+        .nav-logo span{color:var(--gold)}
+        .nav-back{font-size:.72rem;color:var(--gold);text-decoration:none;letter-spacing:1.5px;text-transform:uppercase}
+
+        /* CONTENT WRAPPER */
+        .content{padding:2.5rem 4rem 5rem;position:relative;z-index:1;max-width:860px;margin:0 auto}
+
+        /* PROFILE CARD */
+        .profile-card{background:var(--card-bg);border-radius:4px;box-shadow:var(--shadow);padding:1.5rem;display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;opacity:0;animation:fadeUp .5s ease .05s forwards}
+        .avatar{width:64px;height:64px;border-radius:50%;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--ink);flex-shrink:0}
+        .profile-info{flex:1}
+        .profile-name{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--ink)}
+        .profile-meta{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem}
+        .meta-chip{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--muted)}
+        .meta-chip strong{color:var(--ink)}
+        .profile-stats{display:flex;gap:1.5rem;flex-shrink:0}
+        .stat-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--ink);line-height:1}
+        .stat-label{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+
+        /* CURRENT ROLE BAND */
+        .current-role{background:var(--ink);border-radius:4px;padding:1rem 1.5rem;display:flex;align-items:center;gap:1.2rem;margin-bottom:1.5rem;opacity:0;animation:fadeUp .5s ease .12s forwards}
+        .pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0;box-shadow:0 0 0 3px rgba(201,168,76,.3)}
+        .curr-info{flex:1}
+        .curr-label{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:rgba(245,240,232,.5)}
+        .curr-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--cream);margin-top:.2rem}
+        .curr-dept{font-size:.78rem;color:rgba(245,240,232,.6);margin-top:.15rem}
+        .curr-since{text-align:right;font-size:.75rem;color:rgba(245,240,232,.5)}
+        .curr-since strong{display:block;color:var(--gold);letter-spacing:1px;font-size:.65rem;text-transform:uppercase}
+        .curr-since span{color:var(--cream)}
+
+        /* SECTION HEADER */
+        .section-header{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:1.5rem;opacity:0;animation:fadeUp .5s ease .18s forwards}
+        .section-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--ink);white-space:nowrap}
+        .section-line{flex:1;height:1px;background:var(--border)}
+
+        /* TIMELINE */
+        .timeline{position:relative;padding-left:1.5rem}
+        .timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--border)}
+        .tl-item{position:relative;margin-bottom:1.2rem;opacity:0;animation:fadeUp .4s ease forwards}
+        .tl-dot{position:absolute;left:-1.9rem;top:1.2rem;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid var(--cream);box-shadow:0 0 0 2px var(--gold)}
+        .tl-card{background:var(--card-bg);border-radius:4px;box-shadow:var(--shadow);overflow:hidden}
+        .tc-top{display:flex;justify-content:space-between;align-items:flex-start;padding:1.1rem 1.2rem .8rem;gap:1rem}
+        .tc-job{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink)}
+        .tc-dept-badge{display:inline-block;background:rgba(201,168,76,.15);color:var(--ink);padding:.2rem .6rem;border-radius:2px;font-size:.7rem;letter-spacing:.5px;margin-top:.4rem}
+        .tc-right{text-align:right;flex-shrink:0}
+        .tc-dates{font-size:.75rem;color:var(--muted)}
+        .tc-duration-val{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--ink);margin-top:.25rem}
+        .tc-divider{height:1px;background:var(--border);margin:0 1.2rem}
+        .tc-meta{display:flex;gap:2rem;padding:.8rem 1.2rem}
+        .tc-meta-item{display:flex;flex-direction:column;gap:.2rem}
+        .tc-meta-item strong{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+        .tc-meta-item span{font-size:.82rem;color:var(--ink)}
+
+        /* EMPTY / ERROR */
+        .empty-box{text-align:center;padding:3rem;background:var(--card-bg);border-radius:4px;box-shadow:var(--shadow)}
+        .empty-icon{font-size:2rem;margin-bottom:.75rem}
+        .empty-text{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink)}
+        .empty-sub{font-size:.8rem;color:var(--muted);margin-top:.4rem}
+        .btn-primary{display:inline-flex;align-items:center;background:var(--gold);color:var(--ink);padding:.6rem 1.2rem;border-radius:3px;text-decoration:none;font-size:.82rem;font-weight:500;margin-top:1rem}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @media(max-width:900px){.content{padding:2rem}.top-nav{padding:0 2rem}.profile-stats{display:none}.tc-meta{flex-wrap:wrap;gap:1rem}}
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <a href="/" class="nav-logo">HR <span>Portal</span></a>
+    <a href="/employees" class="nav-back">← Employees</a>
+</nav>
+
+<div class="content">
+
+    <!-- Error state -->
+    <div th:if="${error}" class="empty-box">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text" th:text="${error}">Error</div>
+        <a href="/employees" class="btn-primary">Back to Employees</a>
+    </div>
+
+    <th:block th:unless="${error}">
+
+        <!-- Profile card -->
+        <div class="profile-card">
+            <div class="avatar" th:text="${initials}">AB</div>
+            <div class="profile-info">
+                <div class="profile-name" th:text="${employee.firstName + ' ' + employee.lastName}">Name</div>
+                <div class="profile-meta">
+                    <div class="meta-chip">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><polyline points="16 2 12 6 8 2"/></svg>
+                        <strong th:text="${employee.email ?: '—'}">email</strong>
+                    </div>
+                    <div class="meta-chip" th:if="${employee.phoneNumber}">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.98 2.2a2 2 0 012-2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        <strong th:text="${employee.phoneNumber}">phone</strong>
+                    </div>
+                    <div class="meta-chip">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Hired <strong th:text="${employee.hireDate != null} ? ${#temporals.format(employee.hireDate, 'dd MMM yyyy')} : '—'">date</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-stats">
+                <div>
+                    <div class="stat-val" th:text="${histCount}">0</div>
+                    <div class="stat-label">Past Roles</div>
+                </div>
+                <div>
+                    <div class="stat-val" th:text="${tenureYears > 0} ? ${tenureYears + 'y'} : ${tenureMonths + 'm'}">0y</div>
+                    <div class="stat-label">Tenure</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current role band -->
+        <div class="current-role" th:if="${employee.jobTitle != null and employee.jobTitle != '—'}">
+            <div class="pulse-dot"></div>
+            <div class="curr-info">
+                <div class="curr-label">Current Role</div>
+                <div class="curr-title" th:text="${employee.jobTitle}">Job</div>
+                <div class="curr-dept" th:text="${employee.departmentName ?: '—'}">Dept</div>
+            </div>
+            <div class="curr-since">
+                <strong>Since</strong>
+                <span th:text="${employee.hireDate != null} ? ${#temporals.format(employee.hireDate, 'MMM yyyy')} : '—'">Jan 2020</span>
+            </div>
+        </div>
+
+        <!-- Section header -->
+        <div class="section-header">
+            <h2 class="section-title">Job History</h2>
+        </div>
+
+        <!-- Empty history -->
+        <div th:if="${#lists.isEmpty(histories)}" class="empty-box">
+            <div class="empty-icon">📋</div>
+            <div class="empty-text">No job history found</div>
+            <div class="empty-sub">This employee has no recorded career transitions.</div>
+        </div>
+
+        <!-- Timeline -->
+        <div th:unless="${#lists.isEmpty(histories)}" class="timeline">
+            <div th:each="jh, stat : ${histories}" class="tl-item"
+                 th:style="'animation-delay:' + ${stat.index * 70} + 'ms'">
+                <div class="tl-dot"></div>
+                <div class="tl-card">
+                    <div class="tc-top">
+                        <div>
+                            <div class="tc-job" th:text="${jh.jobTitle ?: '—'}">Job Title</div>
+                            <span class="tc-dept-badge" th:text="${jh.departmentName ?: '—'}">Dept</span>
+                        </div>
+                        <div class="tc-right">
+                            <div class="tc-dates">
+                                <span th:text="${jh.startDate != null} ? ${#temporals.format(jh.startDate, 'dd MMM yyyy')} : '—'">start</span>
+                                &rarr;
+                                <span th:text="${jh.endDate != null} ? ${#temporals.format(jh.endDate, 'dd MMM yyyy')} : '—'">end</span>
+                            </div>
+                            <div class="tc-duration-val"
+                                 th:if="${jh.startDate != null and jh.endDate != null}"
+                                 th:with="months=${T(java.time.temporal.ChronoUnit).MONTHS.between(jh.startDate, jh.endDate)},yrs=${months / 12},rem=${months % 12}">
+                                <th:block th:if="${yrs > 0}" th:text="${yrs + 'y '}"></th:block><th:block th:if="${rem > 0}" th:text="${rem + 'm'}"></th:block><th:block th:if="${months == 0}">&lt;1m</th:block>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tc-divider"></div>
+                    <div class="tc-meta">
+                        <div class="tc-meta-item">
+                            <strong>Start</strong>
+                            <span th:text="${jh.startDate != null} ? ${#temporals.format(jh.startDate, 'dd MMM yyyy')} : '—'">date</span>
+                        </div>
+                        <div class="tc-meta-item">
+                            <strong>End</strong>
+                            <span th:text="${jh.endDate != null} ? ${#temporals.format(jh.endDate, 'dd MMM yyyy')} : '—'">date</span>
+                        </div>
+                        <div class="tc-meta-item"
+                             th:if="${jh.startDate != null and jh.endDate != null}"
+                             th:with="months=${T(java.time.temporal.ChronoUnit).MONTHS.between(jh.startDate, jh.endDate)},yrs=${months / 12},rem=${months % 12}">
+                            <strong>Duration</strong>
+                            <span>
+                                <th:block th:if="${yrs > 0}" th:text="${yrs + 'y '}"></th:block><th:block th:if="${rem > 0}" th:text="${rem + 'm'}"></th:block><th:block th:if="${months == 0}">&lt;1m</th:block>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </th:block>
+</div>
+
+</body>
+</html>
+

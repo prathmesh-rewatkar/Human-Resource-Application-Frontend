@@ -313,6 +313,97 @@
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.success { background: #e8f4ec; border-color: #6abf82; color: #2a6b3c; }
         .toast.error   { background: #fdf0f0; border-color: #e08080; color: #8b2020; }
+
+
+        .manager-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 28px 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.manager-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: var(--gold);
+}
+
+.manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.manager-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.manager-role {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.manager-id {
+    background: #fdf6e3;
+    color: #8a6b1a;
+    border: 1px solid #e8d8a0;
+    padding: 5px 13px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.manager-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.manager-details div {
+    background: #faf8f4;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 11px 14px;
+    font-size: 0.83rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.manager-details strong {
+    color: var(--text-light);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.manager-details span {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.85rem;
+    text-align: right;
+}
     </style>
 </head>
 <body>
@@ -325,7 +416,23 @@
 
 <!-- PAGE -->
 <div class="page">
+    <!-- MANAGER DETAILS -->
+    <div class="manager-card" th:if="${manager != null}">
+        <div class="manager-header">
+            <div>
+                <h2 th:text="${manager.firstName + ' ' + manager.lastName}"></h2>
+                <p class="manager-role">Manager Overview</p>
+            </div>
+            <span class="manager-id">ID: <span th:text="${manager.employeeId}"></span></span>
+        </div>
 
+        <div class="manager-details">
+            <div><strong>Email:</strong> <span th:text="${manager.email}"></span></div>
+            <div><strong>Phone:</strong> <span th:text="${manager.phoneNumber}"></span></div>
+            <div><strong>Salary:</strong> ₹<span th:text="${manager.salary}"></span></div>
+            <div><strong>Hire Date:</strong> <span th:text="${manager.hireDate}"></span></div>
+        </div>
+    </div>
     <!-- HEADER -->
     <div class="page-header">
         <div class="page-title-block">
@@ -425,43 +532,43 @@
 <div class="toast" id="toast"></div>
 
 <script>
-<!--    let activeEmployeeId = null;-->
+    <!--    let activeEmployeeId = null;-->
 
-    function openModal(employeeId, name) {
+        function openModal(employeeId, name) {
 
-    document.getElementById('employeeIdField').value = employeeId; // 🔥 ADD THIS
+        document.getElementById('employeeIdField').value = employeeId; // 🔥 ADD THIS
 
-    document.getElementById('modalSubText').textContent =
-        'Enter the new Manager ID for ' + name + '.';
+        document.getElementById('modalSubText').textContent =
+            'Enter the new Manager ID for ' + name + '.';
 
-    document.getElementById('managerIdInput').value = '';
-    document.getElementById('modalOverlay').classList.add('active');
+        document.getElementById('managerIdInput').value = '';
+        document.getElementById('modalOverlay').classList.add('active');
 
-    setTimeout(() => document.getElementById('managerIdInput').focus(), 50);
-}
-
-    function closeModal() {
-        document.getElementById('modalOverlay').classList.remove('active');
-        activeEmployeeId = null;
+        setTimeout(() => document.getElementById('managerIdInput').focus(), 50);
     }
 
-    function showToast(message, type) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = 'toast ' + type + ' show';
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            activeEmployeeId = null;
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
 
 
-    // Close modal on overlay click
-    document.getElementById('modalOverlay').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
 
-    // Close on Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal();
-    });
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
 </script>
 
 </body>
