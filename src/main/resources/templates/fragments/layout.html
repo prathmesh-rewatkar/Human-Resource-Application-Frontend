@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${title} + ' — HR App'">HR App</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="navbar-brand">
+        <a th:href="@{/}" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+            <div class="brand-icon">HR</div>
+            <span class="brand-text">Human Resources</span>
+        </a>
+    </div>
+    <div class="navbar-links">
+        <a th:href="@{/locations}"
+           th:classappend="${activePage == 'locations'} ? ' active'"
+           class="nav-link">
+            📍 Locations
+        </a>
+        <a th:href="@{/countries}"
+           th:classappend="${activePage == 'countries'} ? ' active'"
+           class="nav-link">
+            🌐 Countries
+        </a>
+        <a th:href="@{/regions}"
+           th:classappend="${activePage == 'regions'} ? ' active'"
+           class="nav-link">
+            🗺 Regions
+        </a>
+    </div>
+</nav>
+
+<!-- PAGE BODY -->
+<main class="main-content">
+    <th:block th:replace="${content}"/>
+</main>
+
+<!-- ════════════════════════════════════════════
+     ALL JAVASCRIPT INLINED — no external .js files
+════════════════════════════════════════════ -->
+<script>
+    /* ── MODAL HELPERS ─────────────────────────────────── */
+    function openModal(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    }
+
+    function closeModal(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.add('hidden'); document.body.style.overflow = ''; }
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === this) closeModal(this.id);
+        });
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(function(m) { closeModal(m.id); });
+        }
+    });
+
+    /* ── FILTERABLE + PAGINATED TABLE ──────────────────── */
+    function initFilterTable(tableId, filterRowId, pageSize) {
+        pageSize = pageSize || 8;
+        var tbody = document.getElementById(tableId);
+        if (!tbody) return;
+
+        var allRows   = Array.from(tbody.querySelectorAll('tr.data-row'));
+        var currentPage = 0;
+        var filtered  = allRows;
+
+        var filterInputs = filterRowId
+            ? document.querySelectorAll('#' + filterRowId + ' .col-filter')
+            : [];
+        var globalInputs = document.querySelectorAll('[data-table="' + tableId + '"]');
+
+        function getFilters() {
+            var vals = [];
+            filterInputs.forEach(function(inp) {
+                vals.push({ col: parseInt(inp.dataset.col), val: inp.value.toLowerCase() });
+            });
+            return vals;
+        }
+
+        function getGlobalQuery() {
+            var q = '';
+            globalInputs.forEach(function(inp) { if (inp.value) q = inp.value.toLowerCase(); });
+            return q;
+        }
+
+        function applyFilter() {
+            var colFilters  = getFilters();
+            var globalQuery = getGlobalQuery();
+
+            filtered = allRows.filter(function(row) {
+                var cells = row.querySelectorAll('td');
+                for (var i = 0; i < colFilters.length; i++) {
+                    var f = colFilters[i];
+                    var cell = cells[f.col];
+                    if (!cell) continue;
+                    if (!cell.textContent.toLowerCase().includes(f.val)) return false;
+                }
+                if (globalQuery) {
+                    if (!row.textContent.toLowerCase().includes(globalQuery)) return false;
+                }
+                return true;
+            });
+
+            currentPage = 0;
+            renderPage();
+            updatePagination();
+        }
+
+        function renderPage() {
+            allRows.forEach(function(r) { r.style.display = 'none'; });
+            var start = currentPage * pageSize;
+            var slice = filtered.slice(start, start + pageSize);
+            slice.forEach(function(r) { r.style.display = ''; });
+            var emptyRow = tbody.querySelector('.empty-msg-row');
+            if (emptyRow) emptyRow.style.display = filtered.length === 0 ? '' : 'none';
+        }
+
+        function updatePagination() {
+            var totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+            var pagContainer = document.querySelector('[data-pag="' + tableId + '"]');
+            if (!pagContainer) return;
+
+            var infoEl = pagContainer.querySelector('.pag-info');
+            if (infoEl) {
+                var start = filtered.length === 0 ? 0 : currentPage * pageSize + 1;
+                var end   = Math.min((currentPage + 1) * pageSize, filtered.length);
+                infoEl.textContent = filtered.length === 0
+                    ? '0 results'
+                    : 'Showing ' + start + '–' + end + ' of ' + filtered.length;
+            }
+
+            var btnsEl = pagContainer.querySelector('.pag-buttons');
+            if (!btnsEl) return;
+            btnsEl.innerHTML = '';
+
+            var prev = document.createElement('button');
+            prev.className = 'pag-btn';
+            prev.innerHTML = '&#8249;';
+            prev.disabled  = currentPage === 0;
+            prev.addEventListener('click', function() { currentPage--; renderPage(); updatePagination(); });
+            btnsEl.appendChild(prev);
+
+            for (var i = 0; i < totalPages; i++) {
+                (function(page) {
+                    var btn = document.createElement('button');
+                    btn.className = 'pag-num' + (page === currentPage ? ' active' : '');
+                    btn.textContent = page + 1;
+                    btn.addEventListener('click', function() { currentPage = page; renderPage(); updatePagination(); });
+                    btnsEl.appendChild(btn);
+                })(i);
+            }
+
+            var next = document.createElement('button');
+            next.className = 'pag-btn';
+            next.innerHTML = '&#8250;';
+            next.disabled  = currentPage >= totalPages - 1;
+            next.addEventListener('click', function() { currentPage++; renderPage(); updatePagination(); });
+            btnsEl.appendChild(next);
+        }
+
+        filterInputs.forEach(function(inp) { inp.addEventListener('input', applyFilter); });
+        globalInputs.forEach(function(inp) { inp.addEventListener('input', applyFilter); });
+
+        applyFilter();
+    }
+
+    /* ── DEPARTMENT ACCORDION ──────────────────────────── */
+    document.querySelectorAll('.dept-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var body   = this.closest('.dept-section').querySelector('.dept-body');
+            var isOpen = body.classList.contains('open');
+            var icon   = this.querySelector('.toggle-icon');
+            body.classList.toggle('open');
+            this.setAttribute('aria-expanded', !isOpen);
+            if (icon) icon.textContent = isOpen ? '▸' : '▾';
+        });
+    });
+
+    /* ── PER-DEPT EMPLOYEE SEARCH ──────────────────────── */
+    document.querySelectorAll('.emp-search').forEach(function(input) {
+        input.addEventListener('input', function() {
+            var q     = this.value.toLowerCase();
+            var tbody = this.closest('.dept-body').querySelector('.emp-tbody');
+            if (!tbody) return;
+            var visible = 0;
+            tbody.querySelectorAll('tr.emp-row').forEach(function(row) {
+                var match = row.textContent.toLowerCase().includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            var countEl = input.closest('.dept-search-row').querySelector('.emp-count');
+            if (countEl) countEl.textContent = q ? visible + ' found' : '';
+        });
+    });
+
+    /* ── EDIT MODAL POPULATION ─────────────────────────── */
+    document.querySelectorAll('[data-edit-btn]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var modalId = this.dataset.editBtn;
+            var modal   = document.getElementById(modalId);
+            if (!modal) return;
+            var self = this;
+            Object.keys(self.dataset).forEach(function(key) {
+                if (key === 'editBtn') return;
+                var field = modal.querySelector('[name="' + key + '"]');
+                if (field) field.value = self.dataset[key];
+            });
+            openModal(modalId);
+        });
+    });
+
+    /* ── DELETE CONFIRM MODAL ──────────────────────────── */
+    document.querySelectorAll('[data-delete-btn]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var modalId    = this.dataset.deleteBtn;
+            var modal      = document.getElementById(modalId);
+            if (!modal) return;
+            var formAction = this.dataset.deleteAction;
+            var form       = modal.querySelector('form');
+            if (form && formAction) form.action = formAction;
+            var label      = this.dataset.deleteLabel;
+            var labelEl    = modal.querySelector('.delete-label');
+            if (labelEl && label) labelEl.textContent = label;
+            openModal(modalId);
+        });
+    });
+
+    /* ── DELETE REGION: wire count warning ─────────────── */
+    document.querySelectorAll('[data-delete-btn="modal-delete-region"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var count  = this.dataset.deleteCount || 0;
+            var warnEl = document.getElementById('delete-region-warn');
+            if (warnEl) {
+                warnEl.textContent = count > 0
+                    ? '⚠ This region has ' + count + ' countries linked. Deletion will fail.'
+                    : '✔ No countries linked — safe to delete.';
+                warnEl.style.color = count > 0 ? 'var(--amber)' : 'var(--green)';
+            }
+        });
+    });
+
+    /* ── AUTO-DISMISS ALERTS ───────────────────────────── */
+    document.querySelectorAll('.alert').forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity .5s';
+            alert.style.opacity    = '0';
+            setTimeout(function() { alert.remove(); }, 500);
+        }, 4000);
+    });
+</script>
+
+</body>
+</html>
