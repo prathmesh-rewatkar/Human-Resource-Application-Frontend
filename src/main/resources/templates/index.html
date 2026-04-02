@@ -29,6 +29,8 @@
         .section-label{font-size:.7rem;letter-spacing:4px;text-transform:uppercase;
             color:var(--rust);font-weight:500;margin-bottom:2.5rem}
         .team-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1.5rem}
+
+        /* ── Card ── */
         .member-card{background:var(--card-bg);border-radius:4px;overflow:hidden;cursor:pointer;
             transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s ease;
             text-decoration:none;display:block;position:relative;
@@ -42,12 +44,33 @@
             background:var(--gold);transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
         .member-card:hover{transform:translateY(-10px);box-shadow:var(--shadow)}
         .member-card:hover::after{transform:scaleX(1)}
+
+        /* ── Card image area (square background) ── */
         .card-image{width:100%;aspect-ratio:1;
             background:linear-gradient(135deg,#e8e0d4 0%,#d4c9b8 100%);
-            display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-        .avatar-placeholder{width:80px;height:80px;border-radius:50%;background:var(--gold-light);
             display:flex;align-items:center;justify-content:center;
-            font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--ink)}
+            position:relative;overflow:hidden}
+
+        /* ── Round photo ── */
+        .member-photo{
+            width:72%;
+            height:72%;
+            object-fit:cover;
+            object-position:center top;
+            border-radius:50%;
+            border:3px solid var(--gold);
+            transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .member-card:hover .member-photo{
+            transform:scale(1.06);
+        }
+
+        /* ── Fallback avatar (shown when no photo) ── */
+        .avatar-placeholder{width:72%;height:72%;border-radius:50%;
+            background:var(--gold-light);display:flex;align-items:center;justify-content:center;
+            font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;
+            color:var(--ink);border:3px solid var(--gold)}
+
         .card-hover-overlay{position:absolute;inset:0;background:rgba(201,168,76,.15);
             opacity:0;transition:opacity .3s ease;display:flex;align-items:center;justify-content:center}
         .member-card:hover .card-hover-overlay{opacity:1}
@@ -82,49 +105,55 @@
     <div class="section-label">— Our Members</div>
     <div class="team-grid">
 
-        <!--        <a class="member-card" th:href="@{/templates/departments}">-->
         <a class="member-card" href="/departments">
             <div class="card-image">
-                <div class="avatar-placeholder">S</div>
+                <img src="/images/swarali.jpeg" alt="Swarali" class="member-photo"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="avatar-placeholder" style="display:none">S</div>
                 <span class="card-number">01</span>
                 <div class="card-hover-overlay"><span class="view-btn">View Work</span></div>
             </div>
             <div class="card-info"><h3>Swarali</h3><p>Departments</p></div>
         </a>
 
-        <!--        <a class="member-card" th:href="@{/employees}">-->
         <a class="member-card" href="/managers?page=0">
             <div class="card-image">
-                <div class="avatar-placeholder">S</div>
+                <img src="/images/samidha.jpeg" alt="Samiddha" class="member-photo"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="avatar-placeholder" style="display:none">S</div>
                 <span class="card-number">02</span>
                 <div class="card-hover-overlay"><span class="view-btn">View Work</span></div>
             </div>
             <div class="card-info"><h3>Samiddha</h3><p>Managers</p></div>
         </a>
 
-        <!--        <a class="member-card" th:href="@{/locations}">-->
         <a class="member-card" th:href="@{/locations}">
-        <div class="card-image">
-            <div class="avatar-placeholder">N</div>
-            <span class="card-number">03</span>
-            <div class="card-hover-overlay"><span class="view-btn">View Work</span></div>
-        </div>
-        <div class="card-info"><h3>Netal</h3><p>Locations</p></div>
-    </a>
+            <div class="card-image">
+                <img src="/images/netal.jpeg" alt="Netal" class="member-photo"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="avatar-placeholder" style="display:none">N</div>
+                <span class="card-number">03</span>
+                <div class="card-hover-overlay"><span class="view-btn">View Work</span></div>
+            </div>
+            <div class="card-info"><h3>Netal</h3><p>Locations</p></div>
+        </a>
 
         <a class="member-card" href="/jobs-page">
             <div class="card-image">
-                <div class="avatar-placeholder">A</div>
+                <img src="/images/nidhi.jpeg" alt="Nidhi" class="member-photo"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="avatar-placeholder" style="display:none">A</div>
                 <span class="card-number">04</span>
                 <div class="card-hover-overlay"><span class="view-btn">View Work</span></div>
             </div>
             <div class="card-info"><h3>Nidhi</h3><p>Jobs</p></div>
         </a>
 
-        <!--        <a class="member-card" th:href="@{/job_history}">-->
         <a class="member-card" href="/employees">
             <div class="card-image">
-                <div class="avatar-placeholder">M</div>
+                <img src="/images/prathmesh.jpeg" alt="Prathmesh" class="member-photo"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="avatar-placeholder" style="display:none">M</div>
                 <span class="card-number">05</span>
                 <div class="card-hover-overlay"><span class="view-btn">View Work</span></div>
             </div>
