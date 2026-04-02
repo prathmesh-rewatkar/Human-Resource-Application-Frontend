@@ -149,4 +149,20 @@ public class ManagerService {
 
         return Arrays.asList(response.getBody());
     }
+
+    public EmployeeDTO getEmployeeById(Integer id) {
+
+        String url = baseUrl + "/employees/" + id;
+
+        ResponseEntity<EmployeeDTO> response =
+                restTemplate.getForEntity(url, EmployeeDTO.class);
+
+        EmployeeDTO dto = response.getBody();
+
+        if (dto != null) {
+            dto.setEmployeeId(id); // 🔥 SET IT MANUALLY
+        }
+
+        return dto;
+    }
 }
