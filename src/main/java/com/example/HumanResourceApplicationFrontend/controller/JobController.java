@@ -100,11 +100,11 @@ public String handleCreate(
     // --- Validation ---
     if (jobId == null || jobId.isBlank()) {
         model.addAttribute("errorMsg", "Job ID is required.");
-        return "jobs/createJob";
+        return "jobs/Createjob";
     }
     if (jobTitle == null || jobTitle.isBlank()) {
         model.addAttribute("errorMsg", "Job Title is required.");
-        return "jobs/createJob";
+        return "jobs/Createjob";
     }
     if (minSalary != null && maxSalary != null && minSalary.compareTo(maxSalary) > 0) {
         model.addAttribute("errorMsg", "Min Salary must be less than or equal to Max Salary.");
@@ -113,7 +113,7 @@ public String handleCreate(
         model.addAttribute("jobTitle", jobTitle);
         model.addAttribute("minSalary", minSalary);
         model.addAttribute("maxSalary", maxSalary);
-        return "jobs/createJob";
+        return "jobs/Createjob";
     }
 
         try {
@@ -127,7 +127,7 @@ public String handleCreate(
             return "redirect:/jobs-page?successMsg=Job+created+successfully";
         } catch (Exception e) {
             model.addAttribute("errorMsg", "Failed to create job.");
-            return "jobs/createJob";
+            return "jobs/Createjob";
         }
     }
 
@@ -136,7 +136,7 @@ public String handleCreate(
     public String showEditForm(@PathVariable String jobId, Model model) {
         JobDTO job = jobService.getJobById(jobId);
         model.addAttribute("job", job);
-        return "jobs/editJob";
+        return "jobs/EditJob";
     }
 
     // ── EDIT JOB ──────────────────────────────────────────────────
@@ -148,7 +148,7 @@ public String handleEdit(@PathVariable String jobId, @RequestParam String jobTit
         model.addAttribute("errorMsg", "Job Title cannot be empty.");
         JobDTO job = jobService.getJobById(jobId);
         model.addAttribute("job", job);
-        return "jobs/editJob";
+        return "jobs/EditJob";
     }
     try {
         Map<String, Object> body = new HashMap<>();
@@ -163,7 +163,7 @@ public String handleEdit(@PathVariable String jobId, @RequestParam String jobTit
         model.addAttribute("errorMsg", "Update failed.");
         JobDTO job = jobService.getJobById(jobId);
         model.addAttribute("job", job);
-        return "jobs/editJob";
+        return "jobs/EditJob";
     }
 }
 
