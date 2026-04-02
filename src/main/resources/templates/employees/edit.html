@@ -16,14 +16,16 @@
         .nav-logo span{color:var(--gold)}
         .nav-back{font-size:.72rem;color:var(--gold);text-decoration:none;letter-spacing:1.5px;text-transform:uppercase}
 
-        .header{padding:2.5rem 4rem 1.5rem;position:relative;z-index:1;opacity:0;animation:fadeUp .5s ease .05s forwards;display:flex;justify-content:center}
+        .header{padding:2.5rem 4rem 1rem;position:relative;z-index:1;opacity:0;animation:fadeUp .5s ease .05s forwards;display:flex;justify-content:center}
         .header-copy{text-align:center}
         .header-line{width:40px;height:3px;background:var(--gold);margin-bottom:.75rem}
         .header h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--ink);letter-spacing:-1px;line-height:1.1}
         .header h1 span{color:var(--gold)}
         .header p{margin-top:.5rem;color:#6b6560;font-size:.9rem;font-weight:300;letter-spacing:.5px}
 
-        .id-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--card-bg);border:1px solid var(--border);border-radius:3px;padding:.4rem 1rem;margin:0 4rem 1rem;font-size:.78rem;opacity:0;animation:fadeUp .5s ease .15s forwards}
+        /* FIX: id-badge now rendered in HTML */
+        .id-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--card-bg);border:1px solid var(--border);border-radius:3px;padding:.4rem 1rem;margin:0 auto 1rem;font-size:.78rem;opacity:0;animation:fadeUp .5s ease .15s forwards;position:relative;z-index:1}
+        .id-badge-wrap{display:flex;justify-content:center;padding:0 4rem}
         .id-label{color:var(--muted);letter-spacing:.5px}
         .id-value{font-family:'Playfair Display',serif;font-weight:700;color:var(--ink)}
 
@@ -54,7 +56,7 @@
         .toast.error{background:var(--rust);color:#fff}
 
         @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @media(max-width:900px){.header,.form-wrap,.id-badge{padding-left:2rem;padding-right:2rem;margin-left:0}.top-nav{padding:0 2rem}.fields-grid,.fields-grid.three-col{grid-template-columns:1fr 1fr}}
+        @media(max-width:900px){.header,.form-wrap,.id-badge-wrap{padding-left:2rem;padding-right:2rem}.top-nav{padding:0 2rem}.fields-grid,.fields-grid.three-col{grid-template-columns:1fr 1fr}}
         @media(max-width:600px){.fields-grid,.fields-grid.three-col{grid-template-columns:1fr}}
     </style>
 </head>
@@ -73,8 +75,16 @@
     </div>
 </div>
 
+<!-- FIX: id-badge element was missing from original HTML -->
+<div class="id-badge-wrap">
+    <div class="id-badge">
+        <span class="id-label">EMPLOYEE ID</span>
+        <span class="id-value" th:text="${form.employeeId}">—</span>
+    </div>
+</div>
+
 <div class="form-wrap">
-    <form method="post" th:action="@{/employees/edit/{id}(id=${form.employeeId})}" class="form-card">
+    <form method="post" th:action="@{'/employees/edit/' + ${form.employeeId}}" class="form-card">
         <input type="hidden" name="employeeId" th:value="${form.employeeId}">
 
         <!-- Section 1: Personal -->
@@ -82,6 +92,7 @@
             <span class="section-band-num">1</span>
             <span class="section-band-title">Personal Information</span>
         </div>
+        <!-- FIX: removed debug <p> tag that was breaking grid layout -->
         <div class="fields-grid">
             <div class="field">
                 <label>First Name <span class="req">*</span></label>
@@ -182,4 +193,3 @@
 
 </body>
 </html>
-

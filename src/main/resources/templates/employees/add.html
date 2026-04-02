@@ -113,7 +113,7 @@
             <div class="field">
                 <label>Hire Date <span class="req">*</span></label>
                 <input type="date" name="hireDate" th:value="${form.hireDate}"
-                       th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                       th:max="${#dates.format(new java.util.Date(), 'yyyy-MM-dd')}" required>
             </div>
             <div class="field">
                 <label>Salary (₹) <span class="req">*</span></label>
