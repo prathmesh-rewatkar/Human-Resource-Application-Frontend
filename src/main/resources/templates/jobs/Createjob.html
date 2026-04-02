@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Add Job — HR Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body style="margin:0;padding:0;font-family:'Inter',sans-serif;background-color:#f5ede8;color:#2a1a14;min-height:100vh;">
+
+<!-- NAV -->
+<nav style="background:#2a1a14;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:56px;">
+    <a href="/" style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:#e8b89a;text-decoration:none;letter-spacing:0.03em;">HR Portal</a>
+    <a href="/jobs-page" style="font-size:0.85rem;color:#c9a08a;text-decoration:none;letter-spacing:0.04em;">← Back to Jobs</a>
+</nav>
+
+<!-- PAGE HEADER -->
+<div style="padding:2.5rem 2.5rem 1.5rem;">
+    <h1 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin:0;color:#2a1a14;">Add Job</h1>
+    <p style="margin:0.35rem 0 0;font-size:0.88rem;color:#8a6050;">Create a new job position</p>
+</div>
+
+<!-- ERROR MESSAGE -->
+<div th:if="${errorMsg}"
+     th:text="${errorMsg}"
+     style="margin:0 2.5rem 1rem;padding:0.85rem 1.25rem;background:#fde8e8;border:1px solid #f5c0c0;color:#8b2020;font-size:0.88rem;">
+</div>
+
+<!-- CREATE FORM — POST to controller, no JS -->
+<div style="padding:0 2.5rem;">
+    <div style="background:#fff;border:1px solid #e8d8ce;padding:2rem 2.5rem;max-width:480px;">
+
+        <form th:action="@{/jobs-page/create}" method="post">
+
+            <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#8a6050;margin-bottom:0.3rem;">Job ID</label>
+            <input type="text" name="jobId" th:value="${jobId}"
+                   placeholder="e.g. AD_VP"
+                   required
+                   style="width:100%;box-sizing:border-box;padding:0.65rem 0.9rem;border:1px solid #d9c4b8;background:#faf6f3;font-family:'Inter',sans-serif;font-size:0.88rem;color:#2a1a14;margin-bottom:1rem;outline:none;"/>
+
+            <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#8a6050;margin-bottom:0.3rem;">Title</label>
+            <input type="text" name="jobTitle" th:value="${jobTitle}"
+                   placeholder="e.g. Vice President"
+                   required
+                   style="width:100%;box-sizing:border-box;padding:0.65rem 0.9rem;border:1px solid #d9c4b8;background:#faf6f3;font-family:'Inter',sans-serif;font-size:0.88rem;color:#2a1a14;margin-bottom:1rem;outline:none;"/>
+
+            <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#8a6050;margin-bottom:0.3rem;">Min Salary</label>
+            <input type="number" name="minSalary" th:value="${minSalary}"
+                   placeholder="e.g. 15000"
+                   style="width:100%;box-sizing:border-box;padding:0.65rem 0.9rem;border:1px solid #d9c4b8;background:#faf6f3;font-family:'Inter',sans-serif;font-size:0.88rem;color:#2a1a14;margin-bottom:1rem;outline:none;"/>
+
+            <label style="display:block;font-size:0.78rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#8a6050;margin-bottom:0.3rem;">Max Salary</label>
+            <input type="number" name="maxSalary" th:value="${maxSalary}"
+                   placeholder="e.g. 30000"
+                   style="width:100%;box-sizing:border-box;padding:0.65rem 0.9rem;border:1px solid #d9c4b8;background:#faf6f3;font-family:'Inter',sans-serif;font-size:0.88rem;color:#2a1a14;margin-bottom:1.5rem;outline:none;"/>
+
+            <div style="display:flex;gap:0.75rem;">
+                <button type="submit"
+                        style="flex:1;padding:0.7rem;background:#2a1a14;color:#f5ede8;border:none;font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;letter-spacing:0.03em;">
+                    Save
+                </button>
+                <a href="/jobs-page"
+                   style="flex:1;padding:0.7rem;background:transparent;color:#2a1a14;border:1px solid #d9c4b8;font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;letter-spacing:0.03em;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer style="margin-top:3rem;padding:1.5rem 2.5rem;border-top:1px solid #e8d8ce;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:0.78rem;color:#8a6050;letter-spacing:0.06em;">HR PORTAL © 2026</span>
+    <a href="/jobs-page" style="font-size:0.82rem;color:#c9714a;text-decoration:none;">← Back to Jobs</a>
+</footer>
+
+</body>
+</html>

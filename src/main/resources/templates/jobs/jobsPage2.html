@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${job != null ? job.jobTitle + ' — HR Portal' : 'Employees — HR Portal'}">Employees</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body style="margin:0;padding:0;font-family:'Inter',sans-serif;background-color:#f5ede8;color:#2a1a14;min-height:100vh;">
+
+<!-- NAV -->
+<nav style="background:#2a1a14;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:56px;">
+    <a href="/" style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:#e8b89a;text-decoration:none;letter-spacing:0.03em;">HR Portal</a>
+    <a href="/jobs-page" style="font-size:0.85rem;color:#c9a08a;text-decoration:none;letter-spacing:0.04em;">← Back to Jobs</a>
+</nav>
+
+<div style="padding:2rem 2.5rem;max-width:1200px;margin:0 auto;">
+
+    <!-- ERROR -->
+    <div th:if="${error}"
+         th:text="${error}"
+         style="background:#fde8e8;border:1px solid #f5c0c0;color:#8b2020;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.88rem;">
+    </div>
+
+    <!-- JOB INFO CARD -->
+    <div th:if="${job != null}"
+         style="background:#fff;border:1px solid #e8d8ce;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;margin-bottom:2rem;">
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:52px;height:52px;background:#f5ede8;border:1px solid #e8d8ce;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">💼</div>
+            <div>
+                <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#2a1a14;line-height:1.2;"
+                     th:text="${job.jobTitle}">Title</div>
+                <!-- Job ID kept but shown smaller/subtle as reference -->
+                <div style="font-size:0.75rem;color:#b8a090;margin-top:0.2rem;letter-spacing:0.05em;"
+                     th:text="${jobId}">ID</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:1.5rem;">
+            <div style="text-align:center;padding:0.75rem 1.5rem;background:#f5ede8;border:1px solid #e8d8ce;">
+                <div style="font-size:1.2rem;font-weight:600;color:#6aaa72;"
+                     th:text="${job.minSalaryFormatted}">$0</div>
+                <div style="font-size:0.72rem;color:#8a6050;text-transform:uppercase;letter-spacing:0.07em;margin-top:0.2rem;">Min Salary</div>
+            </div>
+            <div style="text-align:center;padding:0.75rem 1.5rem;background:#f5ede8;border:1px solid #e8d8ce;">
+                <div style="font-size:1.2rem;font-weight:600;color:#c9714a;"
+                     th:text="${job.maxSalaryFormatted}">$0</div>
+                <div style="font-size:0.72rem;color:#8a6050;text-transform:uppercase;letter-spacing:0.07em;margin-top:0.2rem;">Max Salary</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FALLBACK CARD -->
+    <div th:if="${job == null}"
+         style="background:#fff;border:1px solid #e8d8ce;padding:1.5rem 2rem;display:flex;align-items:center;gap:1rem;margin-bottom:2rem;">
+        <div style="width:52px;height:52px;background:#f5ede8;border:1px solid #e8d8ce;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">💼</div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#2a1a14;"
+             th:text="${jobId}">ID</div>
+    </div>
+
+    <!-- EMPLOYEES TABLE -->
+    <div>
+        <table th:if="${employees != null and !#lists.isEmpty(employees)}"
+               style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8d8ce;">
+            <thead>
+                <tr style="background:#2a1a14;">
+                    <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">#</th>
+                    <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Employee</th>
+                    <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Email</th>
+                    <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Job Title</th>
+                    <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Department</th>
+                    <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Salary</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="emp, s : ${employees}" style="border-bottom:1px solid #f0e4dc;">
+
+                    <!-- Fixed: row number = offset + loop count so page 2 shows 11,12... not 1,2... -->
+                    <td style="padding:1rem 1rem;font-size:0.85rem;color:#8a6050;"
+                        th:text="${pageOffset + s.count}">1</td>
+
+                    <td style="padding:1rem 1rem;">
+                        <div style="display:flex;align-items:center;gap:0.75rem;">
+                            <!-- Fixed: emp.initials now works after adding getInitials() to EmployeeDTO -->
+                            <div style="width:36px;height:36px;border-radius:50%;background:#e8d8ce;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;color:#2a1a14;flex-shrink:0;"
+                                 th:text="${emp.initials}">AB</div>
+                            <div style="font-size:0.88rem;font-weight:500;color:#2a1a14;"
+                                 th:text="${emp.fullName}">Name</div>
+                        </div>
+                    </td>
+
+                    <td style="padding:1rem 1rem;font-size:0.85rem;color:#8a6050;"
+                        th:text="${emp.email}">email</td>
+
+                    <td style="padding:1rem 1rem;font-size:0.85rem;color:#2a1a14;"
+                        th:text="${emp.jobTitle != null ? emp.jobTitle : '—'}">Title</td>
+
+                    <td style="padding:1rem 1rem;">
+                        <span style="background:#f5ede8;border:1px solid #e8d8ce;color:#8a6050;padding:0.25rem 0.65rem;font-size:0.75rem;font-weight:500;letter-spacing:0.04em;"
+                              th:text="${emp.departmentName != null ? emp.departmentName : '—'}">Dept</span>
+                    </td>
+
+                    <td style="padding:1rem 1rem;font-size:0.88rem;font-weight:600;color:#c9714a;"
+                        th:text="${emp.salaryFormatted}">$0</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- EMPTY STATE -->
+        <div th:if="${employees == null or #lists.isEmpty(employees)}"
+             style="text-align:center;padding:4rem;color:#8a6050;font-size:0.9rem;background:#fff;border:1px solid #e8d8ce;">
+            No employees found for this job.
+        </div>
+
+        <!-- PAGINATION -->
+        <div th:if="${totalPages != null and totalPages > 1}"
+             style="padding:1.25rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;border-top:1px solid #e8d8ce;background:#fff;">
+
+            <div style="font-size:0.82rem;color:#8a6050;">
+                Showing
+                <strong style="color:#2a1a14;" th:text="${pageOffset + 1}">1</strong>
+                –
+                <strong style="color:#2a1a14;" th:text="${pageOffset + employees.size()}">10</strong>
+                of
+                <strong style="color:#2a1a14;" th:text="${totalEmployees}">0</strong>
+                employees
+            </div>
+
+            <div style="display:flex;gap:0.4rem;align-items:center;">
+                <!-- prev -->
+                <a th:if="${currentPage > 1}"
+                   th:href="@{/jobs-page/{id}/employees(id=${jobId}, page=${currentPage - 1})}"
+                   style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #d9c4b8;background:#f5ede8;color:#2a1a14;text-decoration:none;font-size:0.85rem;">←</a>
+                <span th:if="${currentPage == 1}"
+                      style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #e8d8ce;background:#faf6f3;color:#c9b0a0;font-size:0.85rem;">←</span>
+
+                <!-- page numbers -->
+                <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{/jobs-page/{id}/employees(id=${jobId}, page=${i})}"
+                       th:text="${i}"
+                       th:style="${i == currentPage}
+                           ? 'display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #2a1a14;background:#2a1a14;color:#f5ede8;text-decoration:none;font-size:0.82rem;font-weight:600;'
+                           : 'display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #d9c4b8;background:#f5ede8;color:#2a1a14;text-decoration:none;font-size:0.82rem;'">
+                    </a>
+                </th:block>
+
+                <!-- next -->
+                <a th:if="${currentPage < totalPages}"
+                   th:href="@{/jobs-page/{id}/employees(id=${jobId}, page=${currentPage + 1})}"
+                   style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #d9c4b8;background:#f5ede8;color:#2a1a14;text-decoration:none;font-size:0.85rem;">→</a>
+                <span th:if="${currentPage >= totalPages}"
+                      style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #e8d8ce;background:#faf6f3;color:#c9b0a0;font-size:0.85rem;">→</span>
+            </div>
+        </div>
+
+        <!-- TOTAL COUNT (single page) -->
+        <div th:if="${totalEmployees != null and totalPages != null and totalPages <= 1 and totalEmployees > 0}"
+             style="padding:1rem 1.25rem;border-top:1px solid #e8d8ce;background:#fff;">
+            <span style="font-size:0.82rem;color:#8a6050;">
+                <strong style="color:#2a1a14;" th:text="${totalEmployees}">0</strong> employees total
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer style="margin-top:3rem;padding:1.5rem 2.5rem;border-top:1px solid #e8d8ce;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:0.78rem;color:#8a6050;letter-spacing:0.06em;">HR PORTAL © 2026</span>
+    <a href="/jobs-page" style="font-size:0.82rem;color:#c9714a;text-decoration:none;">← Back to Jobs</a>
+</footer>
+
+</body>
+</html>
