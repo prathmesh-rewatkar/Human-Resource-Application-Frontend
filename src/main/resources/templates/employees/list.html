@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees — HR Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{--ink:#0f0e0d;--cream:#f5f0e8;--gold:#c9a84c;--gold-light:#e8d5a0;--rust:#c4522a;--card-bg:#ffffff;--shadow:0 8px 40px rgba(15,14,13,0.12);--border:#e0d9cf;--muted:#9b9490}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+        body::before{content:'';position:fixed;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.12) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+        /* NAV */
+        .top-nav{background:var(--ink);padding:0 4rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+        .nav-logo{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--cream);text-decoration:none;letter-spacing:.02em}
+        .nav-logo span{color:var(--gold)}
+        .nav-back{font-size:.72rem;color:var(--gold);text-decoration:none;letter-spacing:1.5px;text-transform:uppercase}
+
+        /* HEADER */
+        .header{padding:2.5rem 4rem 1.5rem;position:relative;z-index:1;opacity:0;animation:fadeUp .5s ease .05s forwards;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+        .header-left{}
+        .header-line{width:40px;height:3px;background:var(--gold);margin-bottom:.75rem}
+        .header h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:900;color:var(--ink);letter-spacing:-1px;line-height:1.1}
+        .header h1 span{color:var(--gold)}
+        .header p{margin-top:.5rem;color:#6b6560;font-size:.9rem;font-weight:300;letter-spacing:.5px}
+        .header-right{display:flex;align-items:center;gap:1.5rem}
+        .total-badge{text-align:right}
+        .total-num{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--ink);line-height:1}
+        .total-label{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
+        .btn-add{background:var(--gold);color:var(--ink);padding:.6rem 1.4rem;border-radius:3px;text-decoration:none;font-size:.8rem;font-weight:500;letter-spacing:.5px;white-space:nowrap;transition:opacity .2s}
+        .btn-add:hover{opacity:.85}
+
+        /* SECTION */
+        .section{padding:0 4rem 5rem;position:relative;z-index:1}
+        .section-label{font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--rust);font-weight:500;margin-bottom:1.5rem}
+
+        /* SEARCH ROW */
+        .search-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem}
+        .search-input{flex:1;min-width:200px;padding:.6rem 1rem;border:1px solid var(--border);border-radius:3px;background:#fff;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--ink);outline:none;transition:border-color .2s}
+        .search-input:focus{border-color:var(--gold)}
+        .filter-select{padding:.6rem 1rem;border:1px solid var(--border);border-radius:3px;background:#fff;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--ink);outline:none;cursor:pointer;min-width:160px}
+        .filter-select:focus{border-color:var(--gold)}
+        .btn-search{background:var(--gold);color:var(--ink);padding:.6rem 1.2rem;border:none;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;letter-spacing:.5px;cursor:pointer;transition:opacity .2s}
+        .btn-search:hover{opacity:.85}
+        .btn-reset{color:var(--muted);text-decoration:none;font-size:.82rem;padding:.6rem .8rem;border-radius:3px;transition:color .2s}
+        .btn-reset:hover{color:var(--ink)}
+
+        /* TABLE */
+        .table-wrap{background:var(--card-bg);border-radius:4px;overflow:hidden;box-shadow:var(--shadow)}
+        table{width:100%;border-collapse:collapse}
+        thead tr{background:var(--ink)}
+        th{padding:.9rem 1rem;font-size:.65rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(245,240,232,.7);text-align:left;white-space:nowrap}
+        td{padding:.85rem 1rem;font-size:.85rem;color:var(--ink);border-bottom:1px solid var(--border);vertical-align:middle}
+        tbody tr:last-child td{border-bottom:none}
+        tbody tr:hover td{background:#faf8f5}
+        .emp-name{font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem}
+        .badge{display:inline-block;background:rgba(201,168,76,.15);color:var(--ink);padding:.2rem .6rem;border-radius:2px;font-size:.72rem;letter-spacing:.5px}
+        .salary-sym{color:var(--muted);font-size:.8rem;margin-right:.1rem}
+
+        /* ACTION CELL */
+        .action-cell{display:flex;gap:.5rem;align-items:center;flex-wrap:nowrap}
+        .btn-edit{background:transparent;border:1px solid var(--gold);color:var(--ink);padding:.3rem .75rem;border-radius:2px;font-size:.72rem;font-weight:500;text-decoration:none;letter-spacing:.5px;transition:background .2s}
+        .btn-edit:hover{background:var(--gold)}
+        .btn-delete{background:transparent;border:1px solid rgba(196,82,42,.4);color:var(--rust);padding:.3rem .75rem;border-radius:2px;font-size:.72rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.5px;transition:background .2s}
+        .btn-delete:hover{background:rgba(196,82,42,.1)}
+        .btn-hist{color:var(--gold);font-size:.72rem;text-decoration:none;letter-spacing:.5px;padding:.3rem 0}
+        .btn-hist:hover{color:var(--ink)}
+
+        /* EMPTY STATE */
+        .state-cell{text-align:center;padding:3rem}
+        .state-icon{font-size:2rem;margin-bottom:.75rem}
+        .state-text{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink)}
+        .state-sub{font-size:.8rem;color:var(--muted);margin-top:.4rem}
+
+        /* PAGINATION */
+        .pagination-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;flex-wrap:wrap;gap:1rem}
+        .pagination-info{font-size:.78rem;color:var(--muted)}
+        .pagination-btns{display:flex;gap:.4rem}
+        .pg-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:2px;background:var(--card-bg);border:1px solid var(--border);color:var(--ink);text-decoration:none;font-size:.82rem;transition:background .2s}
+        .pg-btn:hover{background:var(--gold-light)}
+        .pg-btn.active{background:var(--gold);border-color:var(--gold);font-weight:600}
+        .pg-btn.disabled{opacity:.35;pointer-events:none}
+        .pg-ellipsis{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;color:var(--muted);font-size:.82rem}
+
+        /* TOAST */
+        .toast{position:fixed;bottom:5rem;right:2rem;padding:.75rem 1.2rem;border-radius:3px;display:flex;align-items:center;gap:.5rem;font-size:.82rem;font-weight:500;opacity:0;transform:translateY(10px);transition:all .3s ease;z-index:200;box-shadow:var(--shadow)}
+        .toast.show{opacity:1;transform:translateY(0)}
+        .toast.success{background:#2e7d51;color:#fff}
+        .toast.error{background:var(--rust);color:#fff}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @media(max-width:900px){.header,.section{padding-left:2rem;padding-right:2rem}.top-nav{padding:0 2rem}}
+        @media(max-width:600px){.search-row{flex-direction:column}.action-cell{flex-wrap:wrap}.total-badge{display:none}}
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="top-nav">
+    <a href="/" class="nav-logo">HR <span>Portal</span></a>
+    <a href="/" class="nav-back">← Home</a>
+</nav>
+
+<!-- Header -->
+<div class="header" style="opacity:0;animation:fadeUp .5s ease .05s forwards">
+    <div class="header-left">
+        <div class="header-line"></div>
+        <h1>All <span>Employees</span></h1>
+        <p>Browse, search and manage personnel records</p>
+    </div>
+    <div class="header-right">
+        <div class="total-badge">
+            <div class="total-num" th:text="${page.totalElements}">0</div>
+            <div class="total-label">Total Staff</div>
+        </div>
+        <a href="/employees/add" class="btn-add">+ Add Employee</a>
+    </div>
+</div>
+
+<!-- Main section -->
+<div class="section">
+    <div class="section-label">— Personnel Records</div>
+
+    <!-- Search / filter form -->
+    <form method="get" action="/employees" class="search-row">
+        <input type="text" name="search" th:value="${search}" placeholder="Search by name…" class="search-input">
+        <select class="filter-select" name="dept">
+            <option value="">All Departments</option>
+            <option th:each="d : ${departments}" th:value="${d.departmentName}" th:text="${d.departmentName}" th:selected="${d.departmentName == dept}"></option>
+        </select>
+        <select class="filter-select" name="job">
+            <option value="">All Jobs</option>
+            <option th:each="j : ${jobs}" th:value="${j.jobTitle}" th:text="${j.jobTitle}" th:selected="${j.jobTitle == job}"></option>
+        </select>
+        <input type="hidden" name="page" value="0">
+        <button type="submit" class="btn-search">Search</button>
+        <a href="/employees" class="btn-reset">Reset</a>
+    </form>
+
+    <!-- Table -->
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Department</th>
+                <th>Job</th>
+                <th>Hire Date</th>
+                <th>Salary</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(employees)}">
+                <td colspan="8">
+                    <div class="state-cell">
+                        <div class="state-icon">🗂️</div>
+                        <div class="state-text">No employees found</div>
+                        <div class="state-sub">Try adjusting your search or filters.</div>
+                    </div>
+                </td>
+            </tr>
+            <tr th:each="emp : ${employees}">
+                <td><div class="emp-name" th:text="${emp.firstName + ' ' + emp.lastName}">Name</div></td>
+                <td th:text="${emp.email ?: '—'}"></td>
+                <td th:text="${emp.phoneNumber ?: '—'}"></td>
+                <td><span class="badge" th:text="${emp.departmentName ?: '—'}"></span></td>
+                <td th:text="${emp.jobTitle ?: '—'}"></td>
+                <td th:text="${emp.hireDate != null} ? ${#temporals.format(emp.hireDate, 'dd MMM yyyy')} : '—'"></td>
+                <td>
+                    <span class="salary-sym">₹</span>
+                    <span th:text="${emp.salary != null} ? ${#numbers.formatDecimal(emp.salary, 1, 'COMMA', 0, 'POINT')} : '—'"></span>
+                </td>
+                <td class="action-cell">
+                    <a th:href="@{/employees/edit/{id}(id=${emp.employeeId})}" class="btn-edit">Edit</a>
+                    <form th:action="@{/employees/delete/{id}(id=${emp.employeeId})}" method="post"
+                          onsubmit="return confirm('Delete this employee? This cannot be undone.');" style="margin:0">
+                        <button type="submit" class="btn-delete">Delete</button>
+                    </form>
+                    <a th:href="@{/job-history(employeeId=${emp.employeeId})}" class="btn-hist">History →</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-row" th:if="${page.totalPages > 1}">
+        <div class="pagination-info">
+            Showing <strong th:text="${currentPage * 10 + 1}">1</strong>–<strong th:text="${(currentPage + 1) * 10 < page.totalElements ? (currentPage + 1) * 10 : page.totalElements}">10</strong>
+            of <strong th:text="${page.totalElements}">0</strong> employees
+        </div>
+        <div class="pagination-btns">
+            <a th:href="@{/employees(page=${currentPage - 1},search=${search},dept=${dept},job=${job})}"
+               th:classappend="${!page.hasPrevious()} ? ' disabled' : ''" class="pg-btn">‹</a>
+            <th:block th:each="p : ${page.pageNumbers}">
+                <span th:if="${p == -1}" class="pg-ellipsis">…</span>
+                <a th:unless="${p == -1}"
+                   th:href="@{/employees(page=${p},search=${search},dept=${dept},job=${job})}"
+                   th:text="${p + 1}"
+                   th:classappend="${p == currentPage} ? ' active' : ''"
+                   class="pg-btn">1</a>
+            </th:block>
+            <a th:href="@{/employees(page=${currentPage + 1},search=${search},dept=${dept},job=${job})}"
+               th:classappend="${!page.hasNext()} ? ' disabled' : ''" class="pg-btn">›</a>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"
+     th:if="${toastMsg}"
+     th:classappend="${toastType == 'success'} ? 'toast success show' : 'toast error show'">
+    <svg th:if="${toastType == 'success'}" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <svg th:if="${toastType != 'success'}" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span th:text="${toastMsg}">Message</span>
+</div>
+
+
+</body>
+</html>
+

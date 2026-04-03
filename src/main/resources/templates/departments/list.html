@@ -1,0 +1,591 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal — Departments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{--ink:#0f0e0d;--cream:#f5f0e8;--gold:#c9a84c;--gold-light:#f0e6c4;
+            --rust:#c4522a;--border:#e2dbd0;--muted:#8a847d;--white:#fff;--danger:#c4522a}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--ink);min-height:100vh}
+
+        /* Topbar */
+        .topbar{background:var(--ink);padding:.9rem 2.5rem;display:flex;align-items:center;justify-content:space-between}
+        .topbar-brand{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;font-weight:700;text-decoration:none}
+        .topbar-back{color:rgba(245,240,232,.6);text-decoration:none;font-size:.8rem;letter-spacing:1px;transition:color .2s}
+        .topbar-back:hover{color:var(--gold)}
+
+        /* Page header */
+        .page-header{padding:2rem 2.5rem 1.5rem;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+        .page-header-left h2{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:.75rem}
+        .count-badge{background:var(--gold);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;padding:.2rem .6rem;border-radius:20px}
+        .page-header-left p{margin-top:.3rem;color:var(--muted);font-size:.85rem}
+        .btn-add{background:var(--ink);color:var(--cream);border:none;padding:.7rem 1.4rem;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:background .2s,transform .15s;display:flex;align-items:center;gap:.5rem}
+        .btn-add:hover{background:var(--gold);color:var(--ink);transform:translateY(-1px)}
+
+        /* Error banner */
+        .error-banner{margin:0 2.5rem 1rem;padding:1rem 1.5rem;background:#fef3f2;border:1px solid #fca5a5;border-radius:4px;color:#c4522a;font-size:.85rem}
+
+        /* Table */
+        .table-container{padding:0 2.5rem 2rem}
+        .table-wrap{background:var(--white);border-radius:6px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 20px rgba(15,14,13,.06)}
+        table{width:100%;border-collapse:collapse}
+        thead{background:var(--ink)}
+        thead th{padding:.9rem 1rem;text-align:left;font-size:.65rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(245,240,232,.7)}
+        thead th:last-child{text-align:center}
+
+        /* Column filter inputs inside thead */
+        .col-filter{width:100%;padding:.35rem .5rem;margin-top:.4rem;border:1px solid rgba(255,255,255,.2);border-radius:3px;background:rgba(255,255,255,.08);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.72rem;outline:none}
+        .col-filter::placeholder{color:rgba(245,240,232,.4)}
+        .col-filter:focus{border-color:var(--gold);background:rgba(255,255,255,.12)}
+
+        tbody tr{border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
+        tbody tr:last-child{border-bottom:none}
+        tbody tr:hover{background:#faf7f2}
+        tbody td{padding:.9rem 1rem;font-size:.88rem;color:var(--ink);vertical-align:middle}
+        .dept-name{font-weight:500;transition:color .2s}
+        tbody tr:hover .dept-name{color:var(--gold)}
+        .city-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.8rem;color:var(--muted)}
+        .city-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+        .manager-info{display:flex;align-items:center;gap:.6rem}
+        .manager-avatar{width:28px;height:28px;border-radius:50%;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;color:var(--ink);flex-shrink:0}
+        .no-value{color:#c5bfb8;font-size:.8rem;font-style:italic}
+        .actions-cell{text-align:center;white-space:nowrap}
+        .btn-edit,.btn-delete{padding:.3rem .7rem;border-radius:3px;font-size:.72rem;font-weight:500;cursor:pointer;border:1.5px solid;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .btn-edit{border-color:var(--ink);color:var(--ink);background:transparent;margin-right:.3rem}
+        .btn-edit:hover{background:var(--ink);color:var(--cream)}
+        .btn-delete{border-color:var(--danger);color:var(--danger);background:transparent}
+        .btn-delete:hover{background:var(--danger);color:white}
+        .empty-state{padding:4rem 2rem;text-align:center;color:var(--muted)}
+        .empty-state h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:.5rem}
+
+        /* Pagination */
+        .pagination-bar{padding:1rem 2.5rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+        .pagination-info{font-size:.82rem;color:var(--muted)}
+        .pagination-controls{display:flex;align-items:center;gap:.4rem}
+        .page-btn{padding:.4rem .8rem;border:1.5px solid var(--border);border-radius:3px;background:var(--white);font-family:'DM Sans',sans-serif;font-size:.8rem;cursor:pointer;color:var(--ink);transition:all .2s;text-decoration:none;display:inline-flex;align-items:center}
+        .page-btn:hover{border-color:var(--gold);color:var(--gold)}
+        .page-btn.active{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+        .page-btn:disabled,.page-btn.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+        .page-size-select{padding:.4rem .6rem;border:1.5px solid var(--border);border-radius:3px;font-family:'DM Sans',sans-serif;font-size:.8rem;background:var(--white);color:var(--ink);cursor:pointer;outline:none}
+        .page-size-select:focus{border-color:var(--gold)}
+
+        /* Modals */
+        .modal-overlay{position:fixed;inset:0;background:rgba(15,14,13,.6);z-index:100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+        .modal-overlay.active{display:flex}
+        .modal{background:var(--white);border-radius:6px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(15,14,13,.3);animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)}
+        @keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-header{padding:1.4rem 1.8rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--ink)}
+        .modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted);line-height:1;transition:color .2s}
+        .modal-close:hover{color:var(--ink)}
+        .modal-body{padding:1.4rem 1.8rem}
+        .form-group{margin-bottom:1.1rem}
+        .form-label{display:block;font-size:.72rem;font-weight:500;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-bottom:.35rem}
+        .form-control{width:100%;padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:3px;font-family:'DM Sans',sans-serif;font-size:.88rem;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s}
+        .form-control:focus{border-color:var(--gold)}
+        .form-hint{font-size:.7rem;color:var(--muted);margin-top:.25rem}
+        .modal-footer{padding:1rem 1.8rem 1.4rem;display:flex;justify-content:flex-end;gap:.75rem}
+        .btn-cancel{padding:.6rem 1.2rem;border:1.5px solid var(--border);border-radius:3px;background:transparent;font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;color:var(--muted)}
+        .btn-save{padding:.6rem 1.4rem;background:var(--ink);color:var(--cream);border:none;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:background .2s}
+        .btn-save:hover{background:var(--gold);color:var(--ink)}
+
+        /* Confirm */
+        .confirm-overlay{position:fixed;inset:0;background:rgba(15,14,13,.5);z-index:150;display:none;align-items:center;justify-content:center}
+        .confirm-overlay.active{display:flex}
+        .confirm-box{background:var(--white);border-radius:6px;padding:2rem;width:360px;max-width:95vw;text-align:center;box-shadow:0 20px 60px rgba(15,14,13,.3)}
+        .confirm-box h3{font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:.5rem}
+        .confirm-box p{font-size:.82rem;color:var(--muted);margin-bottom:1.5rem}
+        .confirm-actions{display:flex;gap:.75rem;justify-content:center}
+
+        /* Toast */
+        .toast{position:fixed;bottom:2rem;right:2rem;background:var(--ink);color:var(--cream);padding:.9rem 1.5rem;border-radius:4px;font-size:.85rem;z-index:200;display:none;border-left:3px solid var(--gold)}
+        .toast.show{display:block;animation:slideIn .3s ease}
+        .toast.error{border-left-color:var(--rust)}
+        @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+        @media(max-width:768px){.page-header,.table-container,.pagination-bar{padding-left:1rem;padding-right:1rem}}
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <a class="topbar-brand" href="/">HR Portal</a>
+    <a class="topbar-back" href="/">← Back to Team</a>
+    <!--    <a class="topbar-brand" th:href="@{/static}">HR Portal</a>-->
+    <!--    <a class="topbar-back" th:href="@{/static}">← Back to Team</a>-->
+</nav>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h2>Departments <span class="count-badge" th:text="${totalElements}">0</span></h2>
+        <p>Browse, search and manage all departments</p>
+    </div>
+    <button class="btn-add" onclick="openAddModal()">+ Add Department</button>
+</div>
+
+<!-- Error banner -->
+<div class="error-banner" th:if="${error != null}" th:text="${error}"></div>
+
+<!-- Table -->
+<div class="table-container">
+    <div class="table-wrap">
+        <table th:if="${departments != null and !departments.isEmpty()}">
+            <thead>
+            <tr>
+                <th style="width:40px">#</th>
+                <th>
+                    Department Name
+                    <input class="col-filter" id="filterName"
+                           placeholder="Filter name..." oninput="applyColumnFilters()">
+                </th>
+                <th>
+                    City
+                    <input class="col-filter" id="filterCity"
+                           placeholder="Filter city..." oninput="applyColumnFilters()">
+                </th>
+                <th>
+                    Street Address
+                    <input class="col-filter" id="filterStreet"
+                           placeholder="Filter address..."
+                           th:value="${streetFilter}"
+                           oninput="applyColumnFilters()">
+                </th>
+                <th>
+                    Manager
+                    <input class="col-filter" id="filterManager"
+                           placeholder="Filter manager..."
+                           th:value="${mgrFilter}"
+                           oninput="applyColumnFilters()">
+                </th>
+
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="deptTableBody">
+            <tr th:each="dept, stat : ${departments}"
+                class="dept-row"
+                th:onclick="'window.location.href=\'/departments/' + ${dept.departmentId} + '/employees\''"
+                style="cursor:pointer">
+
+                <!--                <td style="color:var(&#45;&#45;muted);font-size:.75rem" th:text="${stat.index + 1}">1</td>-->
+                <td style="color:var(--muted);font-size:.75rem"
+                    th:text="${(currentPage * pageSize) + stat.index + 1}">1</td>
+
+                <td class="dept-name" th:text="${dept.departmentName}">Name</td>
+
+                <td>
+                        <span class="city-badge" th:if="${dept.location != null and dept.location.city != null}">
+                            <span class="city-dot"></span>
+                            <span th:text="${dept.location.city}">City</span>
+                        </span>
+                    <span class="no-value" th:if="${dept.location == null or dept.location.city == null}">—</span>
+                </td>
+
+                <td style="color:var(--muted);font-size:.82rem"
+                    th:text="${dept.location != null and dept.location.streetAddress != null ? dept.location.streetAddress : '—'}">
+                </td>
+
+                <td>
+                    <div class="manager-info" th:if="${dept.manager != null}">
+                        <div class="manager-avatar"
+                             th:text="${dept.manager.firstName != null ? dept.manager.firstName.substring(0,1) : '?'}">M</div>
+                        <span th:text="${(dept.manager.firstName != null ? dept.manager.firstName : '') + ' ' + (dept.manager.lastName != null ? dept.manager.lastName : '')}">Name</span>
+                    </div>
+                    <span class="no-value" th:if="${dept.manager == null}">No Manager</span>
+                </td>
+
+                <td class="actions-cell" onclick="event.stopPropagation()">
+                    <button class="btn-edit"
+                            th:attr="onclick=|openEditModal(${dept.departmentId},'${dept.departmentName}')|">
+                        Edit
+                    </button>
+                    <button class="btn-delete"
+                            th:attr="onclick=|confirmDelete(${dept.departmentId},'${dept.departmentName}')|">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="empty-state" th:if="${departments == null or departments.isEmpty()}">
+            <h3>No departments found</h3>
+            <p>Try adjusting your search or add a new department.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="pagination-bar" th:if="${totalPages != null and totalPages > 0}">
+    <div class="pagination-info">
+        Page <strong th:text="${currentPage + 1}">1</strong>
+        of <strong th:text="${totalPages}">1</strong>
+        &nbsp;|&nbsp;
+        <select class="page-size-select" onchange="changePageSize(this.value)">
+            <option th:value="5"  th:selected="${pageSize == 5}">5 / page</option>
+            <option th:value="10" th:selected="${pageSize == 10}">10 / page</option>
+            <option th:value="20" th:selected="${pageSize == 20}">20 / page</option>
+            <option th:value="50" th:selected="${pageSize == 50}">50 / page</option>
+        </select>
+    </div>
+
+    <div class="pagination-controls">
+        <!-- First -->
+        <a class="page-btn" th:classappend="${currentPage == 0 ? 'disabled' : ''}"
+           th:href="@{/departments(page=0,size=${pageSize},search=${search},city=${city})}">«</a>
+        <!-- Prev -->
+        <a class="page-btn" th:classappend="${currentPage == 0 ? 'disabled' : ''}"
+           th:href="@{/departments(page=${currentPage - 1},size=${pageSize},search=${search},city=${city})}">‹</a>
+
+        <!-- Page numbers -->
+        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                  th:if="${i >= currentPage - 2 and i <= currentPage + 2}">
+            <a class="page-btn" th:classappend="${i == currentPage ? 'active' : ''}"
+               th:href="@{/departments(page=${i},size=${pageSize},search=${search},city=${city})}"
+               th:text="${i + 1}">1</a>
+        </th:block>
+
+        <!-- Next -->
+        <a class="page-btn" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}"
+           th:href="@{/departments(page=${currentPage + 1},size=${pageSize},search=${search},city=${city})}">›</a>
+        <!-- Last -->
+        <a class="page-btn" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}"
+           th:href="@{/departments(page=${totalPages - 1},size=${pageSize},search=${search},city=${city})}">»</a>
+    </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addModalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Add New Department</span>
+            <button class="modal-close" onclick="closeModal('addModalOverlay')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Department Name *</label>
+                <input type="text" id="addName" class="form-control" placeholder="e.g. Marketing" maxlength="30">
+                <div class="form-hint">Max 30 characters</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Location *</label>
+                <!--                <input type="number" id="addLocationId" class="form-control" placeholder="e.g. 1700">-->
+                <select id="addLocationId" class="form-control">
+                    <option value="">-Select Location-</option>
+                    <option th:each="loc : ${locations}"
+                            th:value="${loc.id}"
+                            th:text="${loc.city + (loc.stateProvince != null and loc.stateProvince != '' ? ', ' + loc.stateProvince : '') + ' — ' + loc.streetAddress}">
+                    </option>
+                </select>
+                <!--                <div class="form-hint">1700 = Seattle, 1800 = Toronto, 1400 = Southlake</div>-->
+            </div>
+            <div class="form-group">
+                <label class="form-label">Manager (optional)</label>
+                <!--                <input type="number" id="addManagerId" class="form-control" placeholder="e.g. 100">-->
+                <select id="addManagerId" class="form-control">
+                    <option value="">-No Manager-</option>
+                    <option th:each="emp : ${employees}"
+                            th:value="${emp.id}"
+                            th:text="${emp.firstName + ' ' + emp.lastName + ' (' + emp.email + ')'}">
+                    </option>
+                </select>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('addModalOverlay')">Cancel</button>
+            <button class="btn-save" onclick="saveDepartment()">Save Department</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Edit Department</span>
+            <button class="modal-close" onclick="closeModal('editModalOverlay')">×</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editDeptId">
+            <div class="form-group">
+                <label class="form-label">Department Name *</label>
+                <input type="text" id="editName" class="form-control" maxlength="30">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Location (leave unchanged to keep current)</label>
+                <!--                <input type="number" id="editLocationId" class="form-control" placeholder="e.g. 1700">-->
+                <select id="editLocationId" class="form-control">
+                    <option value="">- Keep Current -</option>
+                    <option th:each="loc : ${locations}"
+                            th:value="${loc.id}"
+                            th:text="${loc.city + (loc.stateProvince != null and loc.stateProvince != '' ? ', ' + loc.stateProvince : '') + ' - ' + loc.streetAddress}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Manager (leave unchanged to keep current)</label>
+                <!--                <input type="number" id="editManagerId" class="form-control" placeholder="e.g. 100">-->
+                <select id="editManagerId" class="form-control">
+                    <option value="">- Keep Current -</option>
+                    <option th:each="emp : ${employees}"
+                            th:value="${emp.id}"
+                            th:text="${emp.firstName + ' ' + emp.lastName + ' (' + emp.email + ')'}">
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('editModalOverlay')">Cancel</button>
+            <button class="btn-save" onclick="updateDepartment()">Update Department</button>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <h3>Delete Department?</h3>
+        <p id="confirmMsg">This action cannot be undone.</p>
+        <div class="confirm-actions">
+            <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+            <button class="btn-save" style="background:var(--danger)" onclick="executeDelete()">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script th:inline="javascript">
+    let deletingId = null;
+    const currentSearch = /*[[${search}]]*/ '';
+    const currentCity   = /*[[${city}]]*/ '';
+    const currentPage   = /*[[${currentPage}]]*/ 0;
+    const pageSize      = /*[[${pageSize}]]*/ 10;
+
+    // ── Column-level filter (client-side, instant) ──
+    // function applyColumnFilters() {
+    //     const fn = document.getElementById('filterName')?.value.toLowerCase()   || '';
+    //     const fc = document.getElementById('filterCity')?.value.toLowerCase()   || '';
+    //     const fs = document.getElementById('filterStreet')?.value.toLowerCase() || '';
+    //     const fm = document.getElementById('filterManager')?.value.toLowerCase()|| '';
+    //
+    //     document.querySelectorAll('.dept-row').forEach(row => {
+    //         const cells = row.querySelectorAll('td');
+    //         const name    = (cells[1]?.textContent || '').toLowerCase();
+    //         const city    = (cells[2]?.textContent || '').toLowerCase();
+    //         const street  = (cells[3]?.textContent || '').toLowerCase();
+    //         const manager = (cells[4]?.textContent || '').toLowerCase();
+    //
+    //         const show = name.includes(fn) && city.includes(fc)
+    //             && street.includes(fs) && manager.includes(fm);
+    //         row.style.display = show ? '' : 'none';
+    //     });
+    // }
+
+    // Column filters — server-side search across ALL pages
+    let filterTimer = null;
+
+    function applyColumnFilters() {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(() => {
+            const name   = document.getElementById('filterName')?.value.trim()    || '';
+            const city   = document.getElementById('filterCity')?.value.trim()    || '';
+            const street = document.getElementById('filterStreet')?.value.trim()  || '';
+            const mgr    = document.getElementById('filterManager')?.value.trim() || '';
+
+
+            const params = new URLSearchParams();
+            params.set('page', '0');
+            params.set('size', String(pageSize));
+
+            // Name and manager go to backend search
+            if (name) params.set('search', name);
+            if (city) params.set('city', city);
+
+            // Street and manager are client-side only (no backend endpoint for them)
+            // so store them for post-filter after page loads
+            if (street) params.set('street', street);
+            if (mgr)    params.set('mgr', mgr);
+
+            window.location.href = '/departments?' + params.toString();
+        }, 800); // 800ms debounce
+    }
+
+    // ── Page size change ──
+    function changePageSize(newSize) {
+        const params = new URLSearchParams();
+        params.set('page', '0');
+        params.set('size', newSize);
+        if (currentSearch) params.set('search', currentSearch);
+        if (currentCity)   params.set('city',   currentCity);
+        window.location.href = '/departments?' + params.toString();
+    }
+
+    // ── Modal helpers ──
+    function openAddModal() {
+        ['addName','addLocationId','addManagerId'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('addModalOverlay').classList.add('active');
+    }
+
+    function openEditModal(id, name) {
+        document.getElementById('editDeptId').value = id;
+        document.getElementById('editName').value   = name;
+        document.getElementById('editLocationId').value = '';
+        document.getElementById('editManagerId').value  = '';
+        document.getElementById('editModalOverlay').classList.add('active');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function confirmDelete(id, name) {
+        deletingId = id;
+        document.getElementById('confirmMsg').textContent = `Delete "${name}"? This cannot be undone.`;
+        document.getElementById('confirmOverlay').classList.add('active');
+    }
+
+    function closeConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('active');
+        deletingId = null;
+    }
+
+    // ── Toast ──
+    function showToast(msg, isErr = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show' + (isErr ? ' error' : '');
+        setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    // ── POST ──
+    async function saveDepartment() {
+        const name       = document.getElementById('addName').value.trim();
+        const locationId = document.getElementById('addLocationId').value.trim();
+        const managerId  = document.getElementById('addManagerId').value.trim();
+
+        if (!name)       { showToast('Department name is required', true); return; }
+        if (!locationId) { showToast('Location ID is required', true); return; }
+
+        const params = new URLSearchParams({ departmentName: name, locationId });
+        if (managerId) params.set('managerId', managerId);
+
+        try {
+            const res = await fetch('/api/departments?' + params.toString(), { method: 'POST' });
+            // if (res.status === 201 || res.status === 200) {
+            if(res.ok()){
+                closeModal('addModalOverlay');
+                showToast('Department created successfully!');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                const text = await res.text();
+                showToast('Failed: ' + text, true);
+            }
+        } catch (e) { showToast('Added', true); }
+    }
+
+    // ── PATCH ──
+    async function updateDepartment() {
+        const id         = document.getElementById('editDeptId').value;
+        const name       = document.getElementById('editName').value.trim();
+        const locationId = document.getElementById('editLocationId').value.trim();
+        const managerId  = document.getElementById('editManagerId').value.trim();
+
+        if (!name) { showToast('Department name is required', true); return; }
+
+        const params = new URLSearchParams({ departmentName: name });
+        if (locationId) params.set('locationId', locationId);
+        if (managerId)  params.set('managerId',  managerId);
+
+        try {
+            const res = await fetch('/api/departments/' + id + '?' + params.toString(), { method: 'PATCH' });
+            if (res.status === 204 || res.status === 200) {
+                closeModal('editModalOverlay');
+                showToast('Department updated!');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                const text = await res.text();
+                showToast('Failed: ' + text, true);
+            }
+        } catch (e) { showToast('Network error', true); }
+    }
+
+    // ── DELETE ──
+    async function executeDelete() {
+        if (!deletingId) return;
+        try {
+            const res = await fetch('/api/departments/' + deletingId, { method: 'DELETE' });
+            if (res.status === 204 || res.status === 200) {
+                closeConfirm();
+                showToast('Department deleted');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('Failed to delete', true);
+            }
+        } catch (e) { showToast('Network error', true); }
+    }
+
+    // Close on overlay click
+    ['addModalOverlay','editModalOverlay'].forEach(id => {
+        document.getElementById(id).addEventListener('click', function(e) {
+            if (e.target === this) closeModal(id);
+        });
+    });
+
+    // Add at bottom of <script> block — runs on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const streetVal = /*[[${streetFilter}]]*/ '';
+        const mgrVal    = /*[[${mgrFilter}]]*/ '';
+
+        //Read persisted filter values from Thymeleaf
+        // const streetVal = '[[${streetFilter != null ? streetFilter : ""}]]';
+        // const mgrVal    = '[[${mgrFilter != null ? mgrFilter : ""}]]';
+
+        // Pre-fill the inputs so user sees what they typed
+        const streetInput = document.getElementById('filterStreet');
+        const mgrInput    = document.getElementById('filterManager');
+        if (streetInput && streetVal) streetInput.value = streetVal;
+        if (mgrInput    && mgrVal)    mgrInput.value    = mgrVal;
+
+        // // Apply client-side filter if values exist
+        // if (streetVal || mgrVal) {
+        //     clientSideFilter(streetVal, mgrVal);
+        // }
+
+        // if (streetVal || mgrVal) {
+        //     document.querySelectorAll('.dept-row').forEach(row => {
+        //         const cells   = row.querySelectorAll('td');
+        //         const street  = (cells[3]?.textContent || '').toLowerCase();
+        //         const manager = (cells[4]?.textContent || '').toLowerCase();
+        //         const show = street.includes(streetVal.toLowerCase())
+        //             && manager.includes(mgrVal.toLowerCase());
+        //         row.style.display = show ? '' : 'none';
+        //     });
+        // }
+    });
+
+    // // Separate client-side filter function
+    // function clientSideFilter(streetVal, mgrVal) {
+    //     const sv = (streetVal || '').toLowerCase();
+    //     const mv = (mgrVal || '').toLowerCase();
+    //
+    //     document.querySelectorAll('.dept-row').forEach(row => {
+    //         const cells = row.querySelectorAll('td');
+    //         // td index: 0=#, 1=name, 2=city, 3=street, 4=manager, 5=actions
+    //         const street = (cells[3]?.textContent || '').toLowerCase().trim();
+    //         const manager = (cells[4]?.textContent || '').toLowerCase().trim();
+    //
+    //         const show = street.includes(sv) && manager.includes(mv);
+    //         row.style.display = show ? '' : 'none';
+    //     });
+    // }
+
+</script>
+</body>
+</html>

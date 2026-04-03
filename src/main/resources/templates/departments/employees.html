@@ -1,0 +1,245 @@
+
+
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${department.departmentName + ' — HR Portal'}">Department Employees</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root{--ink:#0f0e0d;--cream:#f5f0e8;--gold:#c9a84c;--gold-light:#f0e6c4;
+            --rust:#c4522a;--border:#e2dbd0;--muted:#8a847d;--white:#fff}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--ink);min-height:100vh}
+
+        .topbar{background:var(--ink);padding:.9rem 2.5rem;display:flex;align-items:center;justify-content:space-between}
+        .topbar-brand{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;font-weight:700;text-decoration:none}
+        .topbar-back{color:rgba(245,240,232,.6);text-decoration:none;font-size:.8rem;letter-spacing:1px;transition:color .2s}
+        .topbar-back:hover{color:var(--gold)}
+
+        /* Hero */
+        .dept-hero{background:var(--white);border-bottom:1px solid var(--border);padding:2rem 2.5rem;
+            display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1.5rem}
+        .dept-hero-left{display:flex;gap:1.5rem;align-items:flex-start}
+        .dept-icon{width:56px;height:56px;background:var(--ink);border-radius:6px;
+            display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .dept-icon span{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--gold)}
+        .dept-info h1{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--ink);margin-bottom:.4rem}
+        .dept-meta{display:flex;gap:1.5rem;flex-wrap:wrap}
+        .dept-meta-item{font-size:.82rem;color:var(--muted)}
+        .meta-label{font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:#bbb5ae;display:block;margin-bottom:.1rem}
+        .meta-value{font-weight:500;color:var(--ink)}
+        .stat-box{text-align:center;padding:.75rem 1.5rem;background:var(--cream);border-radius:4px;border:1px solid var(--border)}
+        .stat-number{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--ink);display:block}
+        .stat-label{font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+
+        /* Manager */
+        .manager-section{padding:1.5rem 2.5rem}
+        .section-title{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+        .manager-card{background:var(--white);border:1px solid var(--border);border-left:3px solid var(--gold);
+            border-radius:4px;padding:1rem 1.3rem;display:inline-flex;align-items:center;gap:1rem}
+        .manager-avatar-lg{width:40px;height:40px;border-radius:50%;background:var(--gold-light);
+            display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;
+            font-size:1rem;font-weight:700;color:var(--ink);flex-shrink:0}
+        .manager-details h4{font-size:.92rem;font-weight:500;color:var(--ink)}
+        .manager-details p{font-size:.75rem;color:var(--muted)}
+        .no-manager-note{font-size:.85rem;color:var(--muted);font-style:italic;padding:.5rem 0}
+
+        /* Employee table */
+        .emp-toolbar{padding:0 2.5rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+        .emp-count{font-size:.82rem;color:var(--muted)}
+        .emp-count strong{color:var(--ink)}
+        .table-container{padding:0 2.5rem 4rem}
+        .table-wrap{background:var(--white);border-radius:6px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 20px rgba(15,14,13,.06)}
+        table{width:100%;border-collapse:collapse}
+        thead{background:var(--ink)}
+        thead th{padding:.85rem 1rem;text-align:left;font-size:.65rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(245,240,232,.7)}
+
+        /* Per-column filter inputs */
+        .col-filter{width:100%;padding:.3rem .5rem;margin-top:.35rem;border:1px solid rgba(255,255,255,.2);
+            border-radius:3px;background:rgba(255,255,255,.08);color:var(--cream);
+            font-family:'DM Sans',sans-serif;font-size:.7rem;outline:none}
+        .col-filter::placeholder{color:rgba(245,240,232,.4)}
+        .col-filter:focus{border-color:var(--gold);background:rgba(255,255,255,.12)}
+
+        tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+        tbody tr:last-child{border-bottom:none}
+        tbody tr:hover{background:#faf7f2}
+        tbody td{padding:.9rem 1rem;font-size:.88rem;color:var(--ink);vertical-align:middle}
+        .emp-name-cell{display:flex;align-items:center;gap:.75rem}
+        .emp-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold-light);
+            display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:600;color:var(--ink);flex-shrink:0}
+        .emp-fullname{font-weight:500}
+        .job-tag{display:inline-block;background:#f0f0ec;color:#5a5550;font-size:.7rem;padding:.2rem .6rem;border-radius:20px}
+        .email-cell{font-size:.8rem;color:var(--muted)}
+        .salary-val{font-weight:500}
+        .empty-state{padding:4rem 2rem;text-align:center;color:var(--muted)}
+        .empty-state h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:.5rem}
+        .emp-row.hidden{display:none}
+
+        @media(max-width:768px){
+            .dept-hero,.manager-section,.emp-toolbar,.table-container{padding-left:1rem;padding-right:1rem}
+            .stat-box{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <a class="topbar-brand" href="/">HR Portal</a>
+    <a class="topbar-back" href="/departments">← Back to Departments</a>
+    <!--    <a class="topbar-brand" th:href="@{/static}">HR Portal</a>-->
+    <!--    <a class="topbar-back" th:href="@{/templates/departments}">← Back to Departments</a>-->
+</nav>
+
+<!-- Department hero -->
+<div class="dept-hero">
+    <div class="dept-hero-left">
+        <div class="dept-icon">
+            <span th:text="${department.departmentName != null ? department.departmentName.substring(0,1) : 'D'}">D</span>
+        </div>
+        <div class="dept-info">
+            <h1 th:text="${department.departmentName}">Department Name</h1>
+            <div class="dept-meta">
+                <div class="dept-meta-item" th:if="${department.location != null}">
+                    <span class="meta-label">Location</span>
+                    <span class="meta-value"
+                          th:text="${department.location.city != null ? department.location.city : '—'} + ${department.location.stateProvince != null ? ', ' + department.location.stateProvince : ''}">
+                    </span>
+                </div>
+                <div class="dept-meta-item" th:if="${department.location != null and department.location.streetAddress != null}">
+                    <span class="meta-label">Address</span>
+                    <span class="meta-value" th:text="${department.location.streetAddress}">Address</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="stat-box">
+        <span class="stat-number" th:text="${employees != null ? employees.size() : 0}">0</span>
+        <span class="stat-label">Employees</span>
+    </div>
+</div>
+
+<!-- Manager -->
+<div class="manager-section">
+    <div class="section-title">— Department Manager</div>
+    <div class="manager-card" th:if="${department.manager != null}">
+        <div class="manager-avatar-lg"
+             th:text="${department.manager.firstName != null ? department.manager.firstName.substring(0,1) : '?'}">M</div>
+        <div class="manager-details">
+            <h4 th:text="${(department.manager.firstName != null ? department.manager.firstName : '') + ' ' + (department.manager.lastName != null ? department.manager.lastName : '')}">Manager Name</h4>
+            <p th:text="${department.manager.email}">email</p>
+        </div>
+    </div>
+    <p class="no-manager-note" th:if="${department.manager == null}">No manager assigned.</p>
+</div>
+
+<!-- Employee count + search info -->
+<div class="emp-toolbar">
+    <span class="emp-count">
+        Showing <strong id="visibleCount" th:text="${employees != null ? employees.size() : 0}">0</strong>
+        of <strong th:text="${employees != null ? employees.size() : 0}">0</strong> employees
+    </span>
+</div>
+
+<!-- Employee table -->
+<div class="table-container">
+    <div class="table-wrap">
+        <table th:if="${employees != null and !employees.isEmpty()}">
+            <thead>
+            <tr>
+                <th style="width:40px">#</th>
+                <th>
+                    Employee
+                    <input class="col-filter" id="filterEmpName" placeholder="Filter name..." oninput="filterEmployeeTable()">
+                </th>
+                <th>
+                    Email
+                    <input class="col-filter" id="filterEmail" placeholder="Filter email..." oninput="filterEmployeeTable()">
+                </th>
+                <th>
+                    Phone
+                    <input class="col-filter" id="filterPhone" placeholder="Filter phone..." oninput="filterEmployeeTable()">
+                </th>
+                <!--                <th>-->
+                <!--                    Job Title-->
+                <!--                    <input class="col-filter" id="filterJob" placeholder="Filter job..." oninput="filterEmployeeTable()">-->
+                <!--                </th>-->
+                <th>
+                    Salary
+                    <input class="col-filter" id="filterSalary" placeholder="Filter salary..." oninput="filterEmployeeTable()">
+                </th>
+            </tr>
+            </thead>
+            <tbody id="empTableBody">
+            <tr class="emp-row" th:each="emp, stat : ${employees}">
+                <td style="color:var(--muted);font-size:.75rem" th:text="${stat.index + 1}">1</td>
+
+                <td>
+                    <div class="emp-name-cell">
+                        <div class="emp-avatar"
+                             th:text="${emp.firstName != null ? emp.firstName.substring(0,1) : '?'}">E</div>
+                        <span class="emp-fullname"
+                              th:text="${(emp.firstName != null ? emp.firstName : '') + ' ' + (emp.lastName != null ? emp.lastName : '')}">Name</span>
+                    </div>
+                </td>
+
+                <td class="email-cell" th:text="${emp.email != null ? emp.email : '—'}">email</td>
+
+                <td style="color:var(--muted);font-size:.82rem"
+                    th:text="${emp.phoneNumber != null ? emp.phoneNumber : '—'}">phone</td>
+
+                <!--                <td>-->
+                <!--                        <span class="job-tag"-->
+                <!--                              th:text="${emp.job != null and emp.job.jobTitle != null ? emp.job.jobTitle : '—'}">Job</span>-->
+                <!--                </td>-->
+
+                <td class="salary-val"
+                    th:text="${emp.salary != null ? '$' + #numbers.formatDecimal(emp.salary, 0, 'COMMA', 0, 'POINT') : '—'}">
+                    $0
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="empty-state" th:if="${employees == null or employees.isEmpty()}">
+            <h3>No employees found</h3>
+            <p>This department has no employees assigned.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterEmployeeTable() {
+        const fn = (document.getElementById('filterEmpName')?.value || '').toLowerCase();
+        const fe = (document.getElementById('filterEmail')?.value   || '').toLowerCase();
+        const fp = (document.getElementById('filterPhone')?.value   || '').toLowerCase();
+        // const fj = (document.getElementById('filterJob')?.value     || '').toLowerCase();
+        const fs = (document.getElementById('filterSalary')?.value  || '').toLowerCase();
+
+        let visible = 0;
+        document.querySelectorAll('.emp-row').forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const name   = (cells[1]?.textContent || '').toLowerCase().trim();
+            const email  = (cells[2]?.textContent || '').toLowerCase().trim();
+            const phone  = (cells[3]?.textContent || '').toLowerCase().trim();
+            // const job    = (cells[4]?.textContent || '').toLowerCase();
+            const salary = (cells[4]?.textContent || '').replace(/[$,]/g, '').toLowerCase().trim();
+
+            const show = name.includes(fn) && email.includes(fe) && phone.includes(fp)
+                 && salary.includes(fs);
+            row.classList.toggle('hidden', !show);
+            if (show) visible++;
+        });
+
+        row.classList.toggle('hidden', !show);
+        if (show) visible++;
+
+        // const vc = document.getElementById('visibleCount');
+        // if (vc) vc.textContent = visible;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Jobs — HR Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body style="margin:0;padding:0;font-family:'Inter',sans-serif;background-color:#f5ede8;color:#2a1a14;min-height:100vh;">
+
+<!-- NAV -->
+<nav style="background:#2a1a14;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:56px;">
+    <a href="/" style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:#e8b89a;text-decoration:none;letter-spacing:0.03em;">HR Portal</a>
+    <a href="/" style="font-size:0.85rem;color:#c9a08a;text-decoration:none;letter-spacing:0.04em;">← Back to Home</a>
+</nav>
+
+<!-- HEADER -->
+<div style="padding:2.5rem 2.5rem 1.5rem;display:flex;align-items:flex-start;justify-content:space-between;">
+    <div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+            <h1 style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;margin:0;color:#2a1a14;letter-spacing:-0.01em;">Jobs</h1>
+            <span style="background:#c9714a;color:#fff;font-size:0.78rem;font-weight:600;padding:0.2rem 0.65rem;border-radius:999px;letter-spacing:0.04em;"
+                  th:text="${total}">0</span>
+        </div>
+        <p style="margin:0.35rem 0 0;font-size:0.88rem;color:#8a6050;font-weight:400;">Browse, search and manage all jobs</p>
+    </div>
+    <a href="/jobs-page/create"
+       style="background:#2a1a14;color:#f5ede8;border:none;padding:0.7rem 1.4rem;font-size:0.9rem;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer;letter-spacing:0.03em;display:inline-flex;align-items:center;gap:0.4rem;text-decoration:none;">
+        + Add Job
+    </a>
+</div>
+
+<!-- SUCCESS / ERROR MESSAGE -->
+<div th:if="${successMsg}"
+     th:text="${successMsg}"
+     style="margin:0 2.5rem 1rem;padding:0.85rem 1.25rem;background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32;font-size:0.88rem;">
+</div>
+<div th:if="${errorMsg}"
+     th:text="${errorMsg}"
+     style="margin:0 2.5rem 1rem;padding:0.85rem 1.25rem;background:#fde8e8;border:1px solid #f5c0c0;color:#8b2020;font-size:0.88rem;">
+</div>
+
+<!-- SEARCH FORM -->
+<form method="get" action="/jobs-page" style="padding:0 2.5rem 1.5rem;">
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <input type="text" name="title" th:value="${searchTitle}"
+               placeholder="Search by job title..."
+               style="flex:1;min-width:220px;padding:0.65rem 1rem;border:1px solid #d9c4b8;background:#fff;font-family:'Inter',sans-serif;font-size:0.88rem;color:#2a1a14;outline:none;"/>
+        <input type="number" name="minSalary" th:value="${searchMin}"
+               placeholder="Min Salary..."
+               style="width:160px;padding:0.65rem 1rem;border:1px solid #d9c4b8;background:#fff;font-family:'Inter',sans-serif;font-size:0.88rem;color:#2a1a14;outline:none;"/>
+        <input type="number" name="maxSalary" th:value="${searchMax}"
+               placeholder="Max Salary..."
+               style="width:160px;padding:0.65rem 1rem;border:1px solid #d9c4b8;background:#fff;font-family:'Inter',sans-serif;font-size:0.88rem;color:#2a1a14;outline:none;"/>
+        <button type="submit"
+                style="padding:0.65rem 1.3rem;background:#2a1a14;border:none;font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:500;color:#f5ede8;cursor:pointer;letter-spacing:0.03em;">
+            Search
+        </button>
+        <a href="/jobs-page"
+           style="padding:0.65rem 1.3rem;background:#f5ede8;border:1px solid #d9c4b8;font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:500;color:#2a1a14;cursor:pointer;letter-spacing:0.03em;text-decoration:none;display:inline-flex;align-items:center;">
+            Clear
+        </a>
+    </div>
+</form>
+
+<!-- TABLE -->
+<div style="padding:0 2.5rem;">
+    <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #e8d8ce;">
+        <thead>
+            <tr style="background:#2a1a14;">
+                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">#</th>
+<!--                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Job ID</th>-->
+                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Title</th>
+                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Min Salary</th>
+                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Max Salary</th>
+                <th style="padding:0.85rem 1rem;text-align:left;font-size:0.72rem;font-weight:600;color:#c9a08a;letter-spacing:0.1em;text-transform:uppercase;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="job, s : ${jobs}" style="border-bottom:1px solid #f0e4dc;">
+                <!-- Fixed: use pageOffset + s.count so page 2 shows 6,7,8... -->
+                <td style="padding:1rem 1rem;font-size:0.88rem;color:#8a6050;"
+                    th:text="${pageOffset + s.count}"></td>
+<!--                <td style="padding:1rem 1rem;font-size:0.88rem;color:#2a1a14;" th:text="${job.jobId}"></td>-->
+                <td style="padding:1rem 1rem;">
+                    <a th:href="@{/jobs-page/{id}/employees(id=${job.jobId})}"
+                       th:text="${job.jobTitle}"
+                       style="color:#c9714a;text-decoration:none;font-size:0.88rem;font-weight:500;"></a>
+                </td>
+                <td style="padding:1rem 1rem;font-size:0.88rem;color:#2a1a14;" th:text="${job.minSalaryFormatted}"></td>
+                <td style="padding:1rem 1rem;font-size:0.88rem;color:#2a1a14;" th:text="${job.maxSalaryFormatted}"></td>
+                <td style="padding:1rem 1rem;">
+                    <a th:href="@{/jobs-page/{id}/edit(id=${job.jobId})}"
+                       style="padding:0.3rem 0.75rem;background:transparent;border:1px solid #d9c4b8;font-family:'Inter',sans-serif;font-size:0.8rem;color:#2a1a14;text-decoration:none;display:inline-block;">
+                        Edit
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${jobs == null or #lists.isEmpty(jobs)}"
+         style="text-align:center;padding:3rem;color:#8a6050;font-size:0.9rem;background:#fff;border:1px solid #e8d8ce;border-top:none;">
+        No jobs found
+    </div>
+</div>
+
+<!-- PAGINATION -->
+<div style="padding:1.5rem 2.5rem;display:flex;align-items:center;gap:0.75rem;">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/jobs-page(page=${currentPage - 1})}"
+       style="padding:0.5rem 1rem;background:#f5ede8;border:1px solid #d9c4b8;font-family:'Inter',sans-serif;font-size:0.85rem;color:#2a1a14;text-decoration:none;display:inline-block;">
+        ←
+    </a>
+    <span th:if="${currentPage == 0}"
+          style="padding:0.5rem 1rem;background:#faf6f3;border:1px solid #e8d8ce;font-family:'Inter',sans-serif;font-size:0.85rem;color:#c9b0a0;display:inline-block;">
+        ←
+    </span>
+
+    <span style="font-size:0.88rem;color:#8a6050;">
+        Page <strong th:text="${currentPage + 1}" style="color:#2a1a14;"></strong>
+    </span>
+
+    <a th:href="@{/jobs-page(page=${currentPage + 1})}"
+       style="padding:0.5rem 1rem;background:#f5ede8;border:1px solid #d9c4b8;font-family:'Inter',sans-serif;font-size:0.85rem;color:#2a1a14;text-decoration:none;display:inline-block;">
+        →
+    </a>
+</div>
+
+<!-- FOOTER -->
+<footer style="margin-top:3rem;padding:1.5rem 2.5rem;border-top:1px solid #e8d8ce;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:0.78rem;color:#8a6050;letter-spacing:0.06em;">HR PORTAL © 2026</span>
+    <a href="/jobs-page" style="font-size:0.82rem;color:#c9714a;text-decoration:none;">↑ Back to Top</a>
+</footer>
+
+</body>
+</html>
